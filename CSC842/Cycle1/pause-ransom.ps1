@@ -97,6 +97,7 @@ function Show-OptionsBox {
 function Backtrace-Process {
     param ([string]$filePath)
     $changeCounter++
+    Write-Host "$counter"
     $filePath = [System.IO.Path]::GetFullPath($filePath)
     $query = "SELECT * FROM CIM_DataFile WHERE Name = '$filePath'"
     $file = Get-WmiObject -Query $query
@@ -154,7 +155,6 @@ foreach ($profile in $userProfiles) {
             $watcher.Path = $keyPath
             $watcher.Filter = "*.*"
             $watcher.IncludeSubdirectories = $true
-            $watcher.EnableRaisingEvents = $true
     
             # Define the action to take when a file is changed
             $action = {
