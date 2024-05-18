@@ -130,7 +130,7 @@ foreach ($profile in $userProfiles) {
         $keyPath = Join-Path -Path $profile.FullName -ChildPath $folder
         foreach ($file in $honeyFiles) {
             foreach ($ext in $honeyExts) {
-                $honey = "$keyPath$file$ext"
+                $honey = "$keyPath\$file$ext"
                 if (-not (Test-Path -Path $honey)) {
                     Set-Content -Path $honey -Value "test"
                     Write-Host "File Created: $honey"
