@@ -51,7 +51,7 @@ $changeCounter = 0 # counter for threshold checks
 # Function to log events
 function Log-Event {
     param ([string]$message)
-    $timestamp = Get-Date.ToUniversalTime()
+    $timestamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
     Add-Content -Path $logFilePath -Value "$timestamp - $message"
 }
 
@@ -160,7 +160,7 @@ foreach ($profile in $userProfiles) {
             $action = {
                 $path = $Event.SourceEventArgs.FullPath
                 $changeType = $Event.SourceEventArgs.ChangeType
-                $timestamp = Get-Date.ToUniversalTime()
+                $timestamp = (Get-Date).ToUniversalTime().ToString("yyyyMMdd_HHmmss")
     
                 # Log the event
                 Log-Event -message "$timestamp - $path was $changeType"
