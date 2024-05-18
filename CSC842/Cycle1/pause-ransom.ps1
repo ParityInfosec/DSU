@@ -141,6 +141,7 @@ foreach ($profile in $userProfiles) {
                 if (-not (Test-Path -Path $keyPath)) {
                     New-Item -Path $keyPath -ItemType Directory | Out-Null
                     Write-Host "Directory Created: $keyPath"
+                }
                 if (-not (Test-Path -Path $honey)) {
                     Write-Host "File Created: $honey"
                 } else {
