@@ -145,8 +145,12 @@ foreach ($profile in $userProfiles) {
                 if (-not (Test-Path -Path $keyPath)) {
                     Write-Host "Folder does not exist: skipping"
                 } elseif (-not (Test-Path -Path $honey)) {
-                    Add-Content -Path $honey -Value "test"
-                    Write-Host "File Created: $honey"
+                    try {
+                        Add-Content -Path $honey -Value "test"
+                        Write-Host "File Created: $honey"
+                    } catch [UnauthorizedAccessException]{
+                        Write-Host "Access Denied: skipping"
+                    }
                 } else {
                     Write-Host "File Found: $honey"
                 }
