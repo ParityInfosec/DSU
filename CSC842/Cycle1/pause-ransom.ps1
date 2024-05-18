@@ -123,6 +123,9 @@ function Backtrace-Process {
 # Get all user profile directories
 $userProfiles = Get-ChildItem -Path "C:\Users" -Directory
 
+# Start LogFile
+Log-Event -message "Starting Log"
+
 # Create a FileSystemWatcher for each user's key folders
 foreach ($profile in $userProfiles) {
     foreach ($folder in $keyUserFolders) {
