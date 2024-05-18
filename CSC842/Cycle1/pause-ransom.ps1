@@ -124,8 +124,10 @@ function Backtrace-Process {
 $userProfiles = Get-ChildItem -Path "C:\Users" -Directory
 
 # Start LogFile
-if (-not (Test-Path -Path $logFilePath)) {
-    Set-Content -Path $logFilePath -Value ""
+$dirPath = Split-Path -Path $logFilePath -Parent
+if (-not (Test-Path -Path $dirPath)) {
+    New-Item -Path $dirPath -ItemType Directory | Out-Null
+    Write-Host "Directory Created: $dirPath"
 }
 Log-Event -message "Starting Log"
 
@@ -138,10 +140,6 @@ foreach ($profile in $userProfiles) {
         foreach ($file in $honeyFiles) {
             foreach ($ext in $honeyExts) {
                 $honey = "$keyPath\$file$ext"
-                if (-not (Test-Path -Path $keyPath)) {
-                    New-Item -Path $keyPath -ItemType Directory | Out-Null
-                    Write-Host "Directory Created: $keyPath"
-                }
                 if (-not (Test-Path -Path $honey)) {
                     Write-Host "File Created: $honey"
                 } else {
