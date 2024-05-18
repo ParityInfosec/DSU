@@ -18,10 +18,10 @@ This script will allow users to monitor key defined folders and "honeypot" files
 Import-Module .\pause-ransom.ps1
 
 .EXAMPLE
-Pause-Ransom -F [folder1,folder2,folder3]
+Pause-Ransom -keyUserFolders [folder1,folder2,folder3]
 
 .EXAMPLE
-Pause-Ransom -L [logfile location]
+Pause-Ransom -logFilePath [logfile location]
 
 .NOTES
 This script is under active development.
@@ -32,15 +32,21 @@ https://github.com/ParityInfosec/DSU
 #>
 
 param (
-    [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt",
-    [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive")
+    [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt", # Maintain a log file 
+    [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive"), # Monitor important user folders for encryption actions
+    [string[]]$honeyFiles = @("0000", "zzzzz"), # Place trigger files at start of alphabetic/reverse alphabetic order 
+    [string[]]$honeyExts = @("", ".txt", ".docx", ".jpg"), # Look for popular extension types targeted by ransomware
+    [string[]]$ransomwareExts = @(".encrypted", ".locked", ".crypto", ".crypt", ".locky"), # known ransomware extensions
+    [int]$changeThreshold = 100,  # Number of changes within the interval to consider suspicious
+    [int]$checkInterval = 10  # Interval in seconds to check the change count
 )
 
 # Dot source to import script content
 . "$PSScriptRoot\pause-process.ps1"
 
-# Initialize an array to hold FileSystemWatcher objects
-$watchers = @()
+# Initialize 
+$watchers = @() # an array to hold FileSystemWatcher objects
+$changeCounter = 0 # counter for threshold checks
 
 # Function to log events
 function Log-Event {
@@ -90,6 +96,7 @@ function Show-OptionsBox {
 # Function to backtrace the process accessing activated watcher file
 function Backtrace-Process {
     param ([string]$filePath)
+    $changeCounter++
     $filePath = [System.IO.Path]::GetFullPath($filePath)
     $query = "SELECT * FROM CIM_DataFile WHERE Name = '$filePath'"
     $file = Get-WmiObject -Query $query
@@ -97,7 +104,7 @@ function Backtrace-Process {
         $fileHandles = Get-Process | Where-Object { $_.Modules.FileName -eq $filePath }
         foreach ($handle in $fileHandles) {
             process-pause -Id $handle.Id
-            $processInfo = "Process ID: $($handle.Id), Process Name: $($handle.Name)"
+            $processInfo = "Process ID: $($hxxxandle.Id), Process Name: $($handle.Name)"
             Write-Host $processInfo
             Log-Event -message $processInfo
             $result = Show-OptionsBox
@@ -121,6 +128,15 @@ foreach ($profile in $userProfiles) {
     foreach ($folder in $keyUserFolders) {
         
         $keyPath = Join-Path -Path $profile.FullName -ChildPath $folder
+        foreach ($file in $honeyFiles) {
+            foreach ($ext in $honeyExts) {
+                $honey = "$keyPath$file$ext"
+                if (not (Test-Path -Path $honey)) {
+                    Set-Content -Path $honey -Value "test"
+                    Write-Host "File Created: $honey"
+                }
+            }
+        }
         
         if (Test-Path -Path $keyPath) {
             # Create a new FileSystemWatcher
