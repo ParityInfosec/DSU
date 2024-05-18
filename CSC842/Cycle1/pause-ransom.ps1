@@ -148,7 +148,8 @@ foreach ($profile in $userProfiles) {
                     try {
                         Add-Content -Path $honey -Value "test"
                         Write-Host "File Created: $honey"
-                    } catch [UnauthorizedAccessException]{
+                    } 
+                    catch [UnauthorizedAccessException]{
                         Write-Host "Access Denied: skipping"
                     }
                 } else {
