@@ -6,6 +6,31 @@
 #  Project/Lab: Cycle1 - PauseRansom
 #  ----------	---	----------------------------------------------------------
 
+<#
+
+.SYNOPSIS
+This is a PowerShell script which detects IOCs from ransomware to pause processes so that incident handlers have the ability to advise and address before further damage is created.
+
+.DESCRIPTION
+This script will allow users to monitor key defined folders and "honeypot" files to find potential bulk/rapid encryption processes. Using the Pause-Process tool, the automated Pause-Ransom tool sends the appropriate pause and unpause running commands. 
+
+.EXAMPLE
+Import-Module .\pause-ransom.ps1
+
+.EXAMPLE
+Pause-Ransom -F [folder1,folder2,folder3]
+
+.EXAMPLE
+Pause-Ransom -L [logfile location]
+
+.NOTES
+This script is under active development.
+
+.LINK
+https://github.com/ParityInfosec/DSU
+
+#>
+
 param (
     [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt",
     [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive")
