@@ -7,9 +7,8 @@
 #  ----------	---	----------------------------------------------------------
 
 param (
-    [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt"
+    [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt",
     [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive")
-
 )
 
 # Dot source to import script content
@@ -26,7 +25,7 @@ function Log-Event {
 }
 
 # Function to display the options box with UAC prompt
-# WORKS
+# WORKS, but no UAC prompt
 function Show-OptionsBox {
     [void][System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
 
@@ -60,12 +59,37 @@ function Show-OptionsBox {
     $form.Controls.Add($noButton)
 
     $result = $form.ShowDialog()
-
     return $result
 }
 
+# Function to backtrace the process accessing activated watcher file
+function Backtrace-Process {
+    param ([string]$filePath)
+    $filePath = [System.IO.Path]::GetFullPath($filePath)
+    $query = "SELECT * FROM CIM_DataFile WHERE Name = '$filePath'"
+    $file = Get-WmiObject -Query $query
+    if ($file) {
+        $fileHandles = Get-Process | Where-Object { $_.Modules.FileName -eq $filePath }
+        foreach ($handle in $fileHandles) {
+            process-pause -Id $handle.Id
+            $processInfo = "Process ID: $($handle.Id), Process Name: $($handle.Name)"
+            Write-Host $processInfo
+            Log-Event -message $processInfo
+            $result = Show-OptionsBox
+            if ($result -eq [System.Windows.Forms.DialogResult]::Yes) {
+                Stop-Process -Id $handle.Id -Force
+                exit
+            } else {
+                process-unpause -Id $handle.Id
+            }
+        }
+    } else {
+        Write-Host "No process found accessing the file."
+    }
+}
+
 # Get all user profile directories
-$userProfiles = Get-ChildItem -Path "C:\User" -Directory
+$userProfiles = Get-ChildItem -Path "C:\Users" -Directory
 
 # Create a FileSystemWatcher for each user's key folders
 foreach ($profile in $userProfiles) {
@@ -92,6 +116,7 @@ foreach ($profile in $userProfiles) {
     
                 # Detect ransomware activity (e.g., rapid file modifications)
                 if ($changeType -eq [System.IO.WatcherChangeTypes]::Changed) {
+                    Backtrace-Process -filePath $path
                     $message = "Potential ransomware activity detected at $timestamp. File: $path"
                     Log-Event -message $message
                 }
@@ -99,6 +124,9 @@ foreach ($profile in $userProfiles) {
         
             # Register the event handler
             Register-ObjectEvent -InputObject $watcher -EventName "Changed" -Action $action
+            Register-ObjectEvent -InputObject $watcher -EventName "Created" -Action $action
+            Register-ObjectEvent -InputObject $watcher -EventName "Deleted" -Action $action
+            Register-ObjectEvent -InputObject $watcher -EventName "Renamed" -Action $action
     
             # Add the watcher to the array
             $watchers += $watcher
@@ -107,29 +135,6 @@ foreach ($profile in $userProfiles) {
         } else {
             Write-Host "Key folder not found for user profile: $($profile.Name)"
         }
-    }
-    # Register the event handler
-    Register-ObjectEvent -InputObject $watcher -EventName "Changed" -Action $action
-}
-
-# Function to backtrace the process accessing activated watcher file
-function Backtrace-Process {
-    param ([string]$filePath)
-    $filePath = [System.IO.Path]::GetFullPath($filePath)
-    $query = "SELECT * FROM CIM_DataFile WHERE Name = '$filePath'"
-    $file = Get-WmiObject -Query $query
-    if ($file) {
-        $fileHandles = Get-Process | Where-Object { $_.Modules.FileName -eq $filePath }
-        foreach ($handle in $fileHandles) {
-            # FIX THIS:
-            # process-pause $($handle.Id)
-            $processInfo = "Process ID: $($handle.Id), Process Name: $($handle.Name)"
-            Write-Host $processInfo
-            Log-Event -message $processInfo
-            Show-OptionsBox
-        }
-    } else {
-        Write-Host "No process found accessing the file."
     }
 }
 
