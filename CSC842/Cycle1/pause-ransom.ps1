@@ -141,6 +141,8 @@ foreach ($profile in $userProfiles) {
                 if (-not (Test-Path -Path $honey)) {
                     Set-Content -Path $honey -Value "test"
                     Write-Host "File Created: $honey"
+                } else {
+                    Write-Host "File Found: $honey"
                 }
             }
         }
