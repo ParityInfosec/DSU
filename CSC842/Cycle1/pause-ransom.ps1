@@ -36,10 +36,34 @@ param (
     [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive"), # Monitor important user folders for encryption actions
     [string[]]$honeyFiles = @("0000", "zzzzz"), # Place trigger files at start of alphabetic/reverse alphabetic order 
     [string[]]$honeyExts = @("", ".txt", ".docx", ".jpg"), # Look for popular extension types targeted by ransomware
-    [string[]]$ransomwareExts = @(".encrypted", ".locked", ".crypto", ".crypt", ".locky"), # known ransomware extensions
     [int]$changeThreshold = 100,  # Number of changes within the interval to consider suspicious
     [int]$checkInterval = 10  # Interval in seconds to check the change count
 )
+
+# Known ransomware extensions
+$ransomwareExtensions = @{
+    ".WNCRY"        = "WannaCry"
+    ".WNCRYT"       = "WannaCry"
+    ".WNCRYT0"      = "WannaCry"
+    ".WNCRY0"       = "WannaCry"
+    ".encrypted"    = "CryptoLocker"
+    ".CryptoLocker" = "CryptoLocker"
+    ".locky"        = "Locky"
+    ".zepto"        = "Locky"
+    ".odin"         = "Locky"
+    ".aes256"       = "Locky"
+    ".shit"         = "Locky"
+    ".thor"         = "Locky"
+    ".zzzzz"        = "Locky"
+    ".cerber"       = "Cerber"
+    ".cerber2"      = "Cerber"
+    ".cerber3"      = "Cerber"
+    ".cbf"          = "Cerber"
+    ".RYK"          = "Ryuk"
+    ".RYUK"         = "Ryuk"
+    ".HR"           = "Ryuk"
+    ".RASTADY"      = "Ryuk"
+}
 
 # Dot source to import script content
 . "$PSScriptRoot\pause-process.ps1"
@@ -176,6 +200,7 @@ foreach ($profile in $userProfiles) {
     
                 # Detect ransomware activity (e.g., rapid file modifications)
                 if ($changeType -eq [System.IO.WatcherChangeTypes]::Changed) {
+                    Write-Host "Triggered" # debugging
                     Backtrace-Process -filePath $path
                     $message = "Potential ransomware activity detected at $timestamp. File: $path"
                     Log-Event -message $message
