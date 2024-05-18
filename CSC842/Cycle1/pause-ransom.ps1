@@ -127,7 +127,10 @@ foreach ($profile in $userProfiles) {
             Register-ObjectEvent -InputObject $watcher -EventName "Created" -Action $action
             Register-ObjectEvent -InputObject $watcher -EventName "Deleted" -Action $action
             Register-ObjectEvent -InputObject $watcher -EventName "Renamed" -Action $action
-    
+            
+            # Enable the FileSystemWatcher
+            $watcher.EnableRaisingEvents = $true
+            
             # Add the watcher to the array
             $watchers += $watcher
     
