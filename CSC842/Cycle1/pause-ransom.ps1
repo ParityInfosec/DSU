@@ -35,7 +35,7 @@ param (
     [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt", # Maintain a log file 
     [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive"), # Monitor important user folders for encryption actions
     [string[]]$honeyFiles = @("0000", "zzzzz"), # Place trigger files at start of alphabetic/reverse alphabetic order 
-    [string[]]$honeyExts = @("", ".txt", ".docx", ".jpg"), # Look for popular extension types targeted by ransomware
+    [string[]]$honeyExts = @("", ".txt", ".docx", ".jpg"), # Build files with popular extension types targeted by ransomware
     [int]$changeThreshold = 100,  # Number of changes within the interval to consider suspicious
     [int]$checkInterval = 10  # Interval in seconds to check the change count
 )
@@ -129,7 +129,7 @@ function Backtrace-Process {
         $fileHandles = Get-Process | Where-Object { $_.Modules.FileName -eq $filePath }
         foreach ($handle in $fileHandles) {
             process-pause -Id $handle.Id
-            $processInfo = "Process ID: $($hxxxandle.Id), Process Name: $($handle.Name)"
+            $processInfo = "Process ID: $($handle.Id), Process Name: $($handle.Name)"
             Write-Host $processInfo
             Log-Event -message $processInfo
             $result = Show-OptionsBox
@@ -227,4 +227,4 @@ foreach ($profile in $userProfiles) {
 }
 
 # Keep the script running
-while ($true) { Start-Sleep -Seconds .01 }
+while ($true) { Start-Sleep -Seconds 2 }
