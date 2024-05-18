@@ -136,12 +136,15 @@ Log-Event -message "Starting Log"
 # Create a FileSystemWatcher for each user's key folders
 foreach ($profile in $userProfiles) {
     foreach ($folder in $keyUserFolders) {
-        
+
+        # Create Honeypot Files
         $keyPath = Join-Path -Path $profile.FullName -ChildPath $folder
         foreach ($file in $honeyFiles) {
             foreach ($ext in $honeyExts) {
                 $honey = "$keyPath\$file$ext"
-                if (-not (Test-Path -Path $honey)) {
+                if (-not (Test-Path -Path $keyPath)) {
+                    Write-Host "Folder does not exist: skipping"
+                } elseif (-not (Test-Path -Path $honey)) {
                     Add-Content -Path $honey -Value "test"
                     Write-Host "File Created: $honey"
                 } else {
