@@ -167,4 +167,4 @@ foreach ($profile in $userProfiles) {
 }
 
 # Keep the script running
-while ($true) { Start-Sleep -Seconds 10 }
+while ($true) { Start-Sleep -Seconds .01 }
