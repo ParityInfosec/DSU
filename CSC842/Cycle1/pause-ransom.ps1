@@ -142,6 +142,7 @@ foreach ($profile in $userProfiles) {
             foreach ($ext in $honeyExts) {
                 $honey = "$keyPath\$file$ext"
                 if (-not (Test-Path -Path $honey)) {
+                    Add-Content -Path $honey -Value "test"
                     Write-Host "File Created: $honey"
                 } else {
                     Write-Host "File Found: $honey"
