@@ -6,16 +6,17 @@
 #  Project/Lab: Cycle1 - PauseRansom
 #  ----------	---	----------------------------------------------------------
 
+param (
+    [string]$logFilePath = "C:\RansomwareLogs\activity_log.txt"
+    [string[]]$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive")
+
+)
+
 # Dot source to import script content
 . "$PSScriptRoot\pause-process.ps1"
 
-# Log dump location
-# TODO: Provide switch to override the default?
-$logFilePath = "C:\RansomwareLogs\activity_log.txt"
 # Initialize an array to hold FileSystemWatcher objects
 $watchers = @()
-# List key User subdirectories to monitor
-$keyUserFolders = @("Documents", "Desktop", "Downloads", "Pictures", "Music", "Videos", "OneDrive")
 
 # Function to log events
 function Log-Event {
@@ -121,7 +122,7 @@ function Backtrace-Process {
         $fileHandles = Get-Process | Where-Object { $_.Modules.FileName -eq $filePath }
         foreach ($handle in $fileHandles) {
             # FIX THIS:
-            process-pause $($handle.Id)
+            # process-pause $($handle.Id)
             $processInfo = "Process ID: $($handle.Id), Process Name: $($handle.Name)"
             Write-Host $processInfo
             Log-Event -message $processInfo
