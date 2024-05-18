@@ -6,7 +6,7 @@
 #  Project/Lab: Cycle1 - PauseRansom
 #  ----------	---	----------------------------------------------------------
 
-# Dot source Script1.ps1 to import its content
+# Dot source to import script content
 . "$PSScriptRoot\pause-process.ps1"
 
 # Log dump location
