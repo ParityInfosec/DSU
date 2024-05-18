@@ -124,7 +124,11 @@ function Backtrace-Process {
 $userProfiles = Get-ChildItem -Path "C:\Users" -Directory
 
 # Start LogFile
+if (-not (Test-Path -Path $logFilePath)) {
+    Set-Content -Path $logFilePath -Value ""
+}
 Log-Event -message "Starting Log"
+
 
 # Create a FileSystemWatcher for each user's key folders
 foreach ($profile in $userProfiles) {
