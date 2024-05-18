@@ -52,7 +52,7 @@ $changeCounter = 0 # counter for threshold checks
 function Log-Event {
     param ([string]$message)
     $timestamp = (Get-Date).ToUniversalTime().ToString()
-    Add-Content -Path $logFilePath -Value "$timestamp - $message"
+    Add-Content -Path $logFilePath -Value "$timestamp (UTC) - $message"
 }
 
 # Function to display the options box with UAC prompt
