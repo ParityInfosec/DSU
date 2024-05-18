@@ -3,7 +3,7 @@
 #  Author: Justin Cornwell
 #  ----------------
 #  Course: CSC842
-#  Project/Lab: Cycle1 - PauseRansom
+#  Project/Lab: Cycle1 - Pause-Ransom
 #  ----------	---	----------------------------------------------------------
 
 <#
