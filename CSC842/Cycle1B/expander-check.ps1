@@ -242,14 +242,17 @@ function Listeners {
     # Start the threads
     $httpThread.Start()
     $httpsThread.Start()
-
+    Write-Host "Threads started"
     # Wait for the threads to finish (they won't unless the listeners stop)
     $httpThread.Join()
     $httpsThread.Join()
+    Write-Host "Threads joined"
 
     # Stop the listeners
     $httpListener.Stop()
     $httpsListener.Stop()
+    Write-Host "Threads stopped"
+
 }
 
 # Force known URL shortners through local proxy/checks
