@@ -40,7 +40,7 @@ param (
                             "san.aq", "short.io", "shorturl.at", "smallseotools.com", "spoo.me", "switchy.io", "t.co", "T2M.co", "tinu.be", "TinyURL.com", "T.LY", 
                             "urlr.me", "v.gd", "vo.la"
                             ), # short list of shortners
-    [string]$hostsFile = "C:\Windows\System32\drivers\etc\hosts"    # For forcing redirect
+    [string]$hostsFile = "`"C:\Windows\System32\drivers\etc\hosts`""    # For forcing redirect
 )
 
 # For HTTP/HTTPS listeners
