@@ -61,14 +61,14 @@ function ExpandURL([string]$URL) {      # Credit: @mdxkln / xkln.net
 # Redirect local to local requests on 80/443 to new ports 8080/8081
 function StartProxy {
     Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=80 listenaddress=127.0.0.1 connectport=8080 connectaddress=127.0.0.1"
-    #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=443 listenaddress=127.0.0.1 connectport=8081 connectaddress=127.0.0.1"
+    Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=443 listenaddress=127.0.0.1 connectport=8081 connectaddress=127.0.0.1"
     
 }
 
 # Remove redirection / Clean Up
 function StopProxy {
     Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=80 listenaddress=127.0.0.1"
-    #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=443 listenaddress=127.0.0.1"
+    Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=443 listenaddress=127.0.0.1"
 }
 
 # VirusTotal uses base64 encoded domains for URL Identifiers in API calls
@@ -150,8 +150,8 @@ function Listeners {
     }
 
     # Define HTTP and HTTPS prefixes
-    $httpPrefix = "http://*:$HttpPort/"
-    $httpsPrefix = "https://*:$HttpsPort/"
+    $httpPrefix = "http://127.0.0.1:$HttpPort/"
+    $httpsPrefix = "https://127.0.0.1:$HttpsPort/"
 
     # Create HTTP listener
     $httpListener = New-Object System.Net.HttpListener
