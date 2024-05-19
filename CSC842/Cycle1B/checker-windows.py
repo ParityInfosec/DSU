@@ -102,6 +102,9 @@ def start_https_server():
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     certpath = path + '\certificate.pem'
     keypath = path + '\privatekey.pem'
+    print(certpath)
+    print(keypath)
+    
     context.load_cert_chain(certfile=certpath, keyfile=keypath)
 
     # Wrap the socket
