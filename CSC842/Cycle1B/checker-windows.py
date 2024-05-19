@@ -72,7 +72,8 @@ def check_site(url):
     # Load JSON data
     data = json.loads(response.json())
     # Extract the "verdict" fields
-    verdicts = [item['attributes']['verdict'] for item in data['data']]
+    verdicts = [item['attributes']['verdict'] for item in response.json()['data']]
+    print(verdicts)
     return verdicts
 
 # Display links & site check results
