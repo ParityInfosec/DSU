@@ -226,14 +226,14 @@ function Listeners {
     # Create a ThreadStart delegate for the HTTPS listener
     #$httpsThreadStart = [System.Threading.ThreadStart]{
     while ($httpsListener.IsListening) {
-           try {
-                $httpsContext = $httpsListener.GetContext()
-                Handle-Request -context $httpsContext
-            } catch {
-                Write-Host "HTTPS Listener encountered an error: $_"
-            }
+        try {
+            $httpsContext = $httpsListener.GetContext()
+            Handle-Request -context $httpsContext
+        } catch {
+            Write-Host "HTTPS Listener encountered an error: $_"
         }
     }
+    
 
     # Handle requests in separate threads
     #$httpThread = [System.Threading.Thread]::new($httpThreadStart)
