@@ -29,8 +29,13 @@ stop_event = threading.Event()
 
 def expand_url(url):
     try:
-        response = requests.get(url, allow_redirects=True, timeout=10)
-        return response.url
+        while True:
+            response = requests.get(url, allow_redirects=False, timeout=10)
+            if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
+                url = response.headers['Location']
+            else:
+                break
+        return url
     except requests.RequestException as e:
         print(f"Error expanding URL: {e}")
         return None
