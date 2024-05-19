@@ -283,6 +283,7 @@ function CleanHosts {
 #GoTime
 LoadHosts
 StartProxy
+Clear-DnsClientCache
 Listeners
 
 try {
