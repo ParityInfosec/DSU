@@ -275,7 +275,7 @@ function CleanHosts {
     $filteredcontent = gc -Path $hostsFile
     foreach ($shortURL in $shortURLs) {
         $entry = "127.0.0.1 $shortURL"
-        filteredcontent = $filteredcontent | where-Object { $_ -notmatch $entry}
+        $filteredcontent = $filteredcontent | where-Object { $_ -notmatch $entry}
         Write-Host "host deleted: $entry"
     }
     Set-Content -Path $hostsFile -value $filteredcontent
