@@ -259,6 +259,7 @@ function Listeners {
 function LoadHosts {
     foreach ($shortURL in $shortURLs) {
         $entry = "127.0.0.1 $shortURL"
+        Write-Host "gc $hostsFile"
         if ((gc $hostsFile) -notmatch $entry) {
             $queue += "$entry`n"
             Write-Host "host written: $entry"
