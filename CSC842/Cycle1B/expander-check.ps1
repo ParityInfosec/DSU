@@ -54,6 +54,7 @@ using System.Security.Authentication;
 "@
 
 function ExpandURL([string]$URL) {      # Credit: @mdxkln / xkln.net
+    Write-Host "Expanding URL"
     (Invoke-WebRequest -MaximumRedirection 0 -Uri $URL -ErrorAction SilentlyContinue).Headers.Location
 }
 
@@ -150,15 +151,15 @@ function Listeners {
 
     # Define HTTP and HTTPS prefixes
     $httpPrefix = "http://*:$HttpPort/"
-    # $httpsPrefix = "https://*:$HttpsPort/"
+    $httpsPrefix = "https://*:$HttpsPort/"
 
     # Create HTTP listener
     $httpListener = New-Object System.Net.HttpListener
     $httpListener.Prefixes.Add($httpPrefix)
 
     # Create HTTPS listener
-    #$httpsListener = New-Object System.Net.HttpListener
-    #$httpsListener.Prefixes.Add($httpsPrefix)
+    $httpsListener = New-Object System.Net.HttpListener
+    $httpsListener.Prefixes.Add($httpsPrefix)
 
     # Bind the certificate to the HTTPS listener
     $certificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($cert.RawData)
@@ -167,10 +168,10 @@ function Listeners {
 
     # Start the listeners
     $httpListener.Start()
-    #$httpsListener.Start()
+    $httpsListener.Start()
 
     Write-Host "Listening for incoming HTTP requests on port $HttpPort..."
-    # Write-Host "Listening for incoming HTTPS requests on port $HttpsPort..."
+    Write-Host "Listening for incoming HTTPS requests on port $HttpsPort..."
 
     function Handle-Request {
         param (
@@ -218,7 +219,7 @@ function Listeners {
     }
 
     # Create a ThreadStart delegate for the HTTP listener
-    #$httpThreadStart = [System.Threading.ThreadStart]{
+    $httpThreadStart = [System.Threading.ThreadStart]{
         try {
             $httpContext = $httpListener.GetContext()
             Handle-Request -context $httpContext
@@ -226,39 +227,39 @@ function Listeners {
         } catch {
             Write-Host "HTTP Listener encountered an error: $_"
         }
-    #}
+    }
 
     # Create a ThreadStart delegate for the HTTPS listener
-    #$httpsThreadStart = [System.Threading.ThreadStart]{
-    #while ($httpsListener.IsListening) {
-    #    try {
-    #        write-host "Really listening to the try loop"
-    #        $httpsContext = $httpsListener.GetContext()
-    #        Write-Host "Got Context...handling"
-    #        Handle-Request -context $httpsContext
-    #    } catch {
-    #        Write-Host "HTTPS Listener encountered an error: $_"
-    #    }
-    #}
+    $httpsThreadStart = [System.Threading.ThreadStart]{
+        while ($httpsListener.IsListening) {
+            try {
+                write-host "Really listening to the try loop"
+                $httpsContext = $httpsListener.GetContext()
+                Write-Host "Got Context...handling"
+                Handle-Request -context $httpsContext
+            } catch {
+                Write-Host "HTTPS Listener encountered an error: $_"
+            }
+    }
     
 
     # Handle requests in separate threads
-    #$httpThread = [System.Threading.Thread]::new($httpThreadStart)
-    #$httpsThread = [System.Threading.Thread]::new($httpsThreadStart)
+    $httpThread = [System.Threading.Thread]::new($httpThreadStart)
+    $httpsThread = [System.Threading.Thread]::new($httpsThreadStart)
 
     # Start the threads
-    #$httpThread.Start()
-    #$httpsThread.Start()
-    #Write-Host "Threads started"
+    $httpThread.Start()
+    $httpsThread.Start()
+    Write-Host "Threads started"
 
     # Wait for the threads to finish (they won't unless the listeners stop)
-    #$httpThread.Join()
-    #$httpsThread.Join()
+    $httpThread.Join()
+    $httpsThread.Join()
     #Write-Host "Threads joined"
 
     # Stop the listeners
     $httpListener.Stop()
-    #$httpsListener.Stop()
+    $httpsListener.Stop()
     #Write-Host "Threads stopped"
 }
 
