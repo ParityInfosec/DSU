@@ -183,6 +183,8 @@ function Listeners {
         # Extract the original requested link
         $originalUrl = $request.Url.AbsoluteUri
         $expandedUrl = ExpandURL($originalUrl)
+        Write-Host $originalUrl
+        Write-Host $expandedUrl
         
         # Get VirusTotal Data
         $output = CheckSite(convert-ToBase64Url($expandedUrl))
