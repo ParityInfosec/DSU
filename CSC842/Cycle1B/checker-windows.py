@@ -5,6 +5,7 @@ import threading
 import requests
 import subprocess
 import base64
+import argparse
 from urllib.parse import urlparse
 from tkinter import Tk, messagebox
 
@@ -141,6 +142,11 @@ def clean_hosts(urls):
                 file.write(line)
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description="URL Expander Script")
+    parser.add_argument('--api_key', required=True, help='VirusTotal API Key')
+    args = parser.parse_args()
+    apiKey = args.api_key
+    
     try:
         print("Press Ctrl+C to stop the script...")
         load_hosts(shortURLs)
