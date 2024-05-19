@@ -68,7 +68,12 @@ def check_site(url):
     print(url)
     headers = {"accept": "application/json", "x-apikey": apiKey}
     response = requests.get(f'https://www.virustotal.com/api/v3/domains/{url}/votes', headers=headers)
-    return response.text
+    
+    # Load JSON data
+    data = json.loads(response.json())
+    # Extract the "verdict" fields
+    verdicts = [item['attributes']['verdict'] for item in data['data']]
+    return verdicts
 
 # Display links & site check results
 def show_options_box(url, expanded_url, message):
