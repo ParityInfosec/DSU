@@ -29,8 +29,7 @@ stop_event = threading.Event()
 
 def expand_url(url):
     try:
-        response = requests.head(url, allow_redirects=True)
-        print(f"Expanded: {response}")
+        response = requests.get(url, allow_redirects=True, timeout=10)
         return response.url
     except requests.RequestException as e:
         print(f"Error expanding URL: {e}")
@@ -66,7 +65,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         protocol = 'https' if self.server.server_port ==8081 else 'http'
         host = self.headers.get('Host')
-        original_url = (f"{protocol}://{host}/{self.path}")
+        original_url = (f"{protocol}://{host}{self.path}")
         print(original_url)
         expanded_url = expand_url(original_url)
         print(expanded_url)
