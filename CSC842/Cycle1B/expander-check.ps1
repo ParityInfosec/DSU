@@ -255,3 +255,14 @@ function LoadHosts {
 
 # Start & Run Listeners
 Listeners
+
+try {
+    Write-Host "Press Ctrl+C to stop the script..."
+    while ($true) {
+        Start-Sleep -Seconds 1
+    }
+}
+catch {
+    Write-Host "Stopping the script..."
+    StopProxy
+}
