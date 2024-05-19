@@ -50,10 +50,7 @@ def stop_proxy():
     subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=443", "listenaddress=127.0.0.1"])
 
 def convert_to_base64_url(url):
-    url_bytes = url.encode('utf-8')
-    base64_bytes = base64.urlsafe_b64encode(url_bytes)
-    print(base64_bytes)
-    return base64_bytes.decode('utf-8').rstrip('=')
+    return base64.urlsafe_b64encode(url.encode()).decode().strip("=")
 
 def check_site(url):
     base64dom = convert_to_base64_url(url)
@@ -146,7 +143,8 @@ if __name__ == "__main__":
     parser.add_argument('--api_key', required=True, help='VirusTotal API Key')
     args = parser.parse_args()
     apiKey = args.api_key
-    
+    print(apiKey)
+
     try:
         print("Press Ctrl+C to stop the script...")
         load_hosts(shortURLs)
