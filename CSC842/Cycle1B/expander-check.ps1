@@ -240,8 +240,8 @@ function Listeners {
             } catch {
                 Write-Host "HTTPS Listener encountered an error: $_"
             }
+        }
     }
-    
 
     # Handle requests in separate threads
     $httpThread = [System.Threading.Thread]::new($httpThreadStart)
