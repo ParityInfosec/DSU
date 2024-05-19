@@ -1,3 +1,14 @@
+'''
+Copyright (c) 2024 Justin Cornwell justin.cornwell@trojans.dsu.edu
+
+Created Date: Saturday, May 18th 2024, 5:02:36 pm
+Author: Justin Cornwell
+----------------
+Course: CSC842
+Project/Lab: Cycle 1 - Extend-Check (Windows)
+----------	---	----------------------------------------------------------
+'''
+
 import os
 import ssl
 import http.server
@@ -21,14 +32,15 @@ shortURLs = [
 ]
 
 # VirusTotal API Key
-apiKey = "ABCDE"
+apiKey = "ABCDE"        # Never hard code; mandatory argument on start
 
 # Hosts file path
 hostsFile = "C:\\Windows\\System32\\drivers\\etc\\hosts"
 
-# Stop event for threads
+# Stop event for threads; graceful close
 stop_event = threading.Event()
 
+# Find redirect message to extract actual target
 def expand_url(url):
     try:
         print(f"Expanding...{url}")
@@ -41,53 +53,60 @@ def expand_url(url):
         print(f"Error expanding URL: {e}")
         return None
 
+# Forward 80/443 to 8080/8081
 def start_proxy():
     subprocess.run(["netsh", "interface", "portproxy", "add", "v4tov4", "listenport=80", "listenaddress=127.0.0.1", "connectport=8080", "connectaddress=127.0.0.1"])
     subprocess.run(["netsh", "interface", "portproxy", "add", "v4tov4", "listenport=443", "listenaddress=127.0.0.1", "connectport=8081", "connectaddress=127.0.0.1"])
 
+# Stop forwarding
 def stop_proxy():
     subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=80", "listenaddress=127.0.0.1"])
     subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=443", "listenaddress=127.0.0.1"])
 
+# Build b64 url for VirusTotal requests
 def convert_to_base64_url(url):
     return base64.urlsafe_b64encode(url.encode()).decode().strip("=")
 
+# API to VirusTotal for site check
 def check_site(url):
     base64dom = convert_to_base64_url(url)
     headers = {"accept": "application/json", "x-apikey": apiKey}
     response = requests.get(f'https://www.virustotal.com/api/v3/urls/{base64dom}/votes?limit=10', headers=headers)
     return response.json()
 
+# Display links & site check results
 def show_options_box(message):
     root = Tk()
     root.withdraw()  # Hide the root window
     result = messagebox.askyesno("Redirect Link Alert", f"{message}\n\nDo you want to continue?")
     root.destroy()
-    return result
+    return result       # Use results to determine if traffic passes
 
+# HTTP(S) handler guiding checks
 class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
-        protocol = 'https' if self.server.server_port ==8081 else 'http'
-        host = self.headers.get('Host')
-        original_url = (f"{protocol}://{host}{self.path}")
-        clean_hosts(host)
-        expanded_url = expand_url(original_url)
-        load_hosts(shortURLs)
-        print(expanded_url)
-        if expanded_url:
-            output = check_site(expanded_url)
-            options_choice = show_options_box(output)
+        protocol = 'https' if self.server.server_port ==8081 else 'http'        # Determine HTTP/HTTPS
+        host = self.headers.get('Host')                                         # Isolate domain
+        original_url = (f"{protocol}://{host}{self.path}")                      # Rebuild original link
+        clean_hosts(host)                                                       # Unblock link long enough to expand url
+        expanded_url = expand_url(original_url)                                 # Deobfuscate shortened link
+        load_hosts(shortURLs)                                                   # Reblock site
 
-            if options_choice:
+        # If link can be deobfuscated...
+        if expanded_url:
+            output = check_site(expanded_url)                                   # Query VirusTotal
+            options_choice = show_options_box(output)                           # Display Continue/Quit box with VirusTotal info
+
+            if options_choice:                                  # If Yes, continue
                 self.send_response(302)
                 self.send_header('Location', expanded_url)
                 self.end_headers()
-            else:
+            else:                                               # If No, send denial message
                 self.send_response(403)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write(f"Access denied: The requested URL ({expanded_url}) is considered malicious.".encode('utf-8'))
-        else:
+        else:                                                   # If link can't be deobfuscated
             self.send_response(500)
             self.end_headers()
 
@@ -97,53 +116,56 @@ class HTTPRequestHandler(RequestHandler):
 class HTTPSRequestHandler(RequestHandler):
     pass
 
+# Build HTTP Listener
 def start_http_server():
     httpd = http.server.HTTPServer(('127.0.0.1', 8080), HTTPRequestHandler)
     print("HTTP Server running on http://127.0.0.1:8080")
     while not stop_event.is_set():
-        httpd.handle_request()
+        httpd.handle_request()                                      # Graceful Close
     httpd.server_close()
 
+# Build HTTPS Listener
 def start_https_server():
     httpd = http.server.HTTPServer(('127.0.0.1', 8081), HTTPSRequestHandler)
 
-    # Create SSL context
+    # Create SSL context with pre-made keys (default included in git pkg)
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    certpath = path + '\certificate.pem'
-    keypath = path + '\privkey.pem'
+    certpath = path + '\certificate.pem'                            # Certs in same folder
+    keypath = path + '\privkey.pem'                                 # Private Key in same folder; generate and maintain locally
     context.load_cert_chain(certfile=certpath, keyfile=keypath)
 
     # Wrap the socket
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
     print("HTTPS Server running on https://127.0.0.1:8081")
-    while not stop_event.is_set():
+    while not stop_event.is_set():                                  # Graceful Close
         httpd.handle_request()
     httpd.server_close()
 
+# "Blackhole" URL shorteners to localhost in .../etc/hosts
 def load_hosts(urls):
     with open(hostsFile, 'a+') as file:
         file.seek(0)
-        lines = file.readlines()
+        lines = file.readlines()                                       # Read hosts file
         for url in urls:
-            entry = f"127.0.0.1 {url}\n"
-            if entry not in lines:
-                file.write(entry)
+            entry = f"127.0.0.1 {url}\n"                               # Build hosts lines
+            if entry not in lines:                                      
+                file.write(entry)                                      # Check if url is in hosts file; if not, write entry to hosts
 
+# Remove URL shortners from .../etc/hosts; can be full list or individual sites (for "unblocking")
 def clean_hosts(urls):
     with open(hostsFile, 'r') as file:
-        lines = file.readlines()
+        lines = file.readlines()                                       # Read hosts file
     with open(hostsFile, 'w') as file:
         for line in lines:
-            if not any(url in line for url in urls):
+            if not any(url in line for url in urls):                   # If content is not a url in array, write to file; deletes added references
                 file.write(line)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="URL Expander Script")
-    parser.add_argument('--api_key', required=True, help='VirusTotal API Key')
+    parser.add_argument('--api_key', required=True, help='VirusTotal API Key')              # Force API key argument for VirusTotal
     args = parser.parse_args()
     apiKey = args.api_key
-    print(apiKey)
 
     try:
         print("Press Ctrl+C to stop the script...")
@@ -156,15 +178,15 @@ if __name__ == "__main__":
         while http_thread.is_alive() or https_thread.is_alive():
             http_thread.join(1)
             https_thread.join(1)
-    except KeyboardInterrupt:
+    except KeyboardInterrupt:                                                               # Ctrl-C interrupts and shuts down tool
         print("Stopping the script...")
-        stop_event.set()
+        stop_event.set()                                                                    # Signal stop to thread loops
         http_thread.join()
         https_thread.join()
-        print("Threads joined...Cleaning Hosts file")
+        print("Threads joined...Cleaning Hosts file")   
         clean_hosts(shortURLs)
         stop_proxy()
-    finally:
+    finally:                                                                                   # Ensure cleanup if error not caught
         stop_event.set()
         http_thread.join()
         https_thread.join()
