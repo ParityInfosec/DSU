@@ -213,20 +213,25 @@ function Listeners {
         $response.OutputStream.Close()
     }
 
-    # Handle requests in separate threads
-    $httpThread = [System.Threading.Thread]::new({
+    # Create a ThreadStart delegate for the HTTP listener
+    $httpThreadStart = [System.Threading.ThreadStart]{
         while ($httpListener.IsListening) {
             $httpContext = $httpListener.GetContext()
             Handle-Request -context $httpContext
         }
-    })
+    }
 
-    $httpsThread = [System.Threading.Thread]::new({
+    # Create a ThreadStart delegate for the HTTPS listener
+    $httpsThreadStart = [System.Threading.ThreadStart]{
         while ($httpsListener.IsListening) {
             $httpsContext = $httpsListener.GetContext()
             Handle-Request -context $httpsContext
         }
-    })
+    }
+
+    # Handle requests in separate threads
+    $httpThread = [System.Threading.Thread]::new($httpThreadStart)
+    $httpsThread = [System.Threading.Thread]::new($httpsThreadStart)
 
     # Start the threads
     $httpThread.Start()
