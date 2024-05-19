@@ -175,7 +175,7 @@ function Listeners {
         param (
             [System.Net.HttpListenerContext]$context
         )
-        
+        Write-Host "Packet Received for processing"
         $request = $context.Request
         $response = $context.Response
 
