@@ -63,15 +63,10 @@ def stop_proxy():
     subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=80", "listenaddress=127.0.0.1"])
     subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=443", "listenaddress=127.0.0.1"])
 
-# Build b64 url for VirusTotal requests
-def convert_to_base64_url(url):
-    return base64.urlsafe_b64encode(url.encode()).decode().strip("=")
-
 # API to VirusTotal for site check
 def check_site(url):
-    base64dom = convert_to_base64_url(url)
     headers = {"accept": "application/json", "x-apikey": apiKey}
-    response = requests.get(f'https://www.virustotal.com/api/v3/urls/{base64dom}/votes?limit=10', headers=headers)
+    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{base64dom}', headers=headers)
     return response.json()
 
 # Display links & site check results
@@ -97,7 +92,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
         # If link can be deobfuscated...
         if expanded_url:
-            output = check_site(expanded_url)                                   # Query VirusTotal
+            output = check_site(expanded_url.headers.get('Host'))               # Query VirusTotal
             options_choice = show_options_box(output)                           # Display Continue/Quit box with VirusTotal info
 
             if options_choice:                                  # If Yes, continue
