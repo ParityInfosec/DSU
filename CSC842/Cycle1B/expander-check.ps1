@@ -53,9 +53,6 @@ using System.Net.Security;
 using System.Security.Authentication;
 "@
 
-# Dot source to import script content
-. "$PSScriptRoot\pause-process.ps1"
-
 function ExpandURL([string]$URL) {      # Credit: @mdxkln / xkln.net
     (Invoke-WebRequest -MaximumRedirection 0 -Uri $URL -ErrorAction SilentlyContinue).Headers.Location
 }
