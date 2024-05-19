@@ -59,15 +59,15 @@ function ExpandURL([string]$URL) {      # Credit: @mdxkln / xkln.net
 
 # Redirect local to local requests on 80/443 to new ports 8080/8081
 function StartProxy {
-    #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=80 listenaddress=127.0.0.1 connectport=8080 connectaddress=127.0.0.1"
-    $proxresponse = Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=443 listenaddress=127.0.0.1 connectport=8081 connectaddress=127.0.0.1"
-    Write-Host $proxresponse
+    Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=80 listenaddress=127.0.0.1 connectport=8080 connectaddress=127.0.0.1"
+    #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=443 listenaddress=127.0.0.1 connectport=8081 connectaddress=127.0.0.1"
+    
 }
 
 # Remove redirection / Clean Up
 function StopProxy {
-    #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=80 listenaddress=127.0.0.1"
-    Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=443 listenaddress=127.0.0.1"
+    Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=80 listenaddress=127.0.0.1"
+    #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy delete v4tov4 listenport=443 listenaddress=127.0.0.1"
 }
 
 # VirusTotal uses base64 encoded domains for URL Identifiers in API calls
@@ -149,16 +149,16 @@ function Listeners {
     }
 
     # Define HTTP and HTTPS prefixes
-    # $httpPrefix = "http://*:$HttpPort/"
-    $httpsPrefix = "https://*:$HttpsPort/"
+    $httpPrefix = "http://*:$HttpPort/"
+    # $httpsPrefix = "https://*:$HttpsPort/"
 
     # Create HTTP listener
-    # $httpListener = New-Object System.Net.HttpListener
-    # $httpListener.Prefixes.Add($httpPrefix)
+    $httpListener = New-Object System.Net.HttpListener
+    $httpListener.Prefixes.Add($httpPrefix)
 
     # Create HTTPS listener
-    $httpsListener = New-Object System.Net.HttpListener
-    $httpsListener.Prefixes.Add($httpsPrefix)
+    #$httpsListener = New-Object System.Net.HttpListener
+    #$httpsListener.Prefixes.Add($httpsPrefix)
 
     # Bind the certificate to the HTTPS listener
     $certificate = [System.Security.Cryptography.X509Certificates.X509Certificate2]::new($cert.RawData)
@@ -166,11 +166,11 @@ function Listeners {
     [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.SecurityProtocolType]::Tls12
 
     # Start the listeners
-    #$httpListener.Start()
-    $httpsListener.Start()
+    $httpListener.Start()
+    #$httpsListener.Start()
 
-    #Write-Host "Listening for incoming HTTP requests on port $HttpPort..."
-    Write-Host "Listening for incoming HTTPS requests on port $HttpsPort..."
+    Write-Host "Listening for incoming HTTP requests on port $HttpPort..."
+    # Write-Host "Listening for incoming HTTPS requests on port $HttpsPort..."
 
     function Handle-Request {
         param (
@@ -215,26 +215,26 @@ function Listeners {
 
     # Create a ThreadStart delegate for the HTTP listener
     #$httpThreadStart = [System.Threading.ThreadStart]{
-    #    try {
-    #        $httpContext = $httpListener.GetContext()
-    #        Handle-Request -context $httpContext
-    #    } catch {
-    #        Write-Host "HTTP Listener encountered an error: $_"
-    #    }
+        try {
+            $httpContext = $httpListener.GetContext()
+            Handle-Request -context $httpContext
+        } catch {
+            Write-Host "HTTP Listener encountered an error: $_"
+        }
     #}
 
     # Create a ThreadStart delegate for the HTTPS listener
     #$httpsThreadStart = [System.Threading.ThreadStart]{
-    while ($httpsListener.IsListening) {
-        try {
-            write-host "Really listening to the try loop"
-            $httpsContext = $httpsListener.GetContext()
-            Write-Host "Got Context...handling"
-            Handle-Request -context $httpsContext
-        } catch {
-            Write-Host "HTTPS Listener encountered an error: $_"
-        }
-    }
+    #while ($httpsListener.IsListening) {
+    #    try {
+    #        write-host "Really listening to the try loop"
+    #        $httpsContext = $httpsListener.GetContext()
+    #        Write-Host "Got Context...handling"
+    #        Handle-Request -context $httpsContext
+    #    } catch {
+    #        Write-Host "HTTPS Listener encountered an error: $_"
+    #    }
+    #}
     
 
     # Handle requests in separate threads
@@ -252,8 +252,8 @@ function Listeners {
     #Write-Host "Threads joined"
 
     # Stop the listeners
-    #$httpListener.Stop()
-    $httpsListener.Stop()
+    $httpListener.Stop()
+    #$httpsListener.Stop()
     #Write-Host "Threads stopped"
 }
 
