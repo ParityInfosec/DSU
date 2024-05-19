@@ -130,6 +130,6 @@ if __name__ == "__main__":
             pass
     except KeyboardInterrupt:
         print("Stopping the script...")
-    finally:
         clean_hosts()
         stop_proxy()
+        exit
