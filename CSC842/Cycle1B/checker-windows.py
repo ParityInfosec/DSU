@@ -6,6 +6,9 @@ import subprocess
 from urllib.parse import urlparse
 from tkinter import Tk, messagebox
 
+# Easier to run outside current directory
+path = os.path.abspath(os.path.dirname(__file__))
+
 # Define known short URL services
 shortURLs = [
     "3.ly", "bit.ly", "bitly.kr", "bl.ink", "buff.ly", "clicky.me", "cutt.ly", "Dub.co", "fox.ly", "gg.gg", "han.gl", 
@@ -91,7 +94,7 @@ def start_https_server():
 
     # Create SSL context
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    context.load_cert_chain(certfile='./certificate.pem', keyfile='./privatekey.pem')
+    context.load_cert_chain(certfile='{path}\\certificate.pem', keyfile='{path}\\privatekey.pem')
 
     # Wrap the socket
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
