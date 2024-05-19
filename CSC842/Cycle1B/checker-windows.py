@@ -150,6 +150,7 @@ if __name__ == "__main__":
         stop_event.set()
         http_thread.join()
         https_thread.join()
+        print("Threads joined...Cleaning Hosts file")
         clean_hosts()
         stop_proxy()
     finally:
