@@ -40,7 +40,7 @@ param (
                             "san.aq", "short.io", "shorturl.at", "smallseotools.com", "spoo.me", "switchy.io", "t.co", "T2M.co", "tinu.be", "TinyURL.com", "T.LY", 
                             "urlr.me", "v.gd", "vo.la"
                             ), # short list of shortners
-    [string]$hostsFile = "`"C:\Windows\System32\drivers\etc\hosts`""    # For forcing redirect
+    [string]$hostsFile = "C:\Windows\System32\drivers\etc\hosts"    # For forcing redirect
 )
 
 # For HTTP/HTTPS listeners
@@ -261,7 +261,7 @@ function LoadHosts {
         $entry = "127.0.0.1 $shortURL"
         Write-Host "gc $hostsFile"
         Write-Host $entry
-        if ((gc -Path $hostsFile -raw) -notmatch $entry) {
+        if ((gc -Path $hostsFile) -notmatch $entry) {
             $queue += "$entry`n"
             Write-Host "host written: $entry"
         } else {
