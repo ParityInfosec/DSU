@@ -95,7 +95,7 @@ def start_https_server():
 
     # Create SSL context
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    context.load_cert_chain(certfile='{path}\\certificate.pem', keyfile='{path}\\privatekey.pem')
+    context.load_cert_chain(certfile=f'{path}\certificate.pem', keyfile=f'{path}\privatekey.pem')
 
     # Wrap the socket
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
