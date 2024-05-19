@@ -80,7 +80,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
 
 def start_server():
     httpd = http.server.HTTPServer(('127.0.0.1', 8080), RequestHandler)
-    httpd.socket = ssl.wrap_socket(httpd.socket, certfile='localhost.pem', server_side=True)  # Adjust certfile path
+    httpd.socket = ssl.wrap_socket(httpd.socket, certfile='certificate.pem', server_side=True) 
     httpd.serve_forever()
 
 def load_hosts():
