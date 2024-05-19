@@ -283,6 +283,7 @@ function CleanHosts {
 
 #GoTime
 LoadHosts
+CleanHosts
 StartProxy
 
 try {
