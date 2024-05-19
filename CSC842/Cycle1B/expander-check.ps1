@@ -179,7 +179,9 @@ function Listeners {
         Write-Host "Packet Received for processing"
         $request = $context.Request
         $response = $context.Response
-
+        Write-Host $context
+        Write-Host $request
+        
         # Extract the original requested link
         $originalUrl = $request.Url.AbsoluteUri
         $expandedUrl = ExpandURL($originalUrl)
