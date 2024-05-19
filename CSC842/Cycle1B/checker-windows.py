@@ -32,6 +32,7 @@ def expand_url(url):
         print(f"Expanding...{url}")
         while True:
             response = requests.get(url, allow_redirects=False, timeout=10)
+            print(response)
             if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
                 url = response.headers['Location']
                 print(f"Expanded...{url}")
