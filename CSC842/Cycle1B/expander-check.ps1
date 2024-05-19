@@ -61,7 +61,7 @@ function ExpandURL([string]$URL) {      # Credit: @mdxkln / xkln.net
 function StartProxy {
     #Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=80 listenaddress=127.0.0.1 connectport=8080 connectaddress=127.0.0.1"
     $proxresponse = Start-Process -FilePath "netsh" -ArgumentList "interface portproxy add v4tov4 listenport=443 listenaddress=127.0.0.1 connectport=8081 connectaddress=127.0.0.1"
-    Write-File $proxresponse
+    Write-Host $proxresponse
 }
 
 # Remove redirection / Clean Up
