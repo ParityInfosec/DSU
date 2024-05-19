@@ -70,13 +70,13 @@ def check_site(url):
     return response.json()
 
 # Display links & site check results
-def show_options_box(message):
+def show_options_box(url, expanded_url, message):
     root = Tk()
     root.withdraw()  # Hide the root window
     root.attributes("-topmost", True)  # Make sure the root window is on top
     root.update()  # Update the window to ensure it processes the above changes
 
-    result = messagebox.askyesno("Redirect Link Alert", f"{message}\n\nDo you want to continue?")
+    result = messagebox.askyesno("Redirect Link Alert", f"Original Link: {url}\n\nDid you intend to go to {expanded_url}\n\n\{message}\n\nDo you want to continue?")
     root.destroy()
     return result       # Use results to determine if traffic passes
 
@@ -93,7 +93,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         # If link can be deobfuscated...
         if expanded_url:
             output = check_site(expanded_url.headers.get('Host'))               # Query VirusTotal
-            options_choice = show_options_box(output)                           # Display Continue/Quit box with VirusTotal info
+            options_choice = show_options_box(original_url, expanded_url, output)             # Display Continue/Quit box with VirusTotal info
 
             if options_choice:                                  # If Yes, continue
                 self.send_response(302)
