@@ -227,7 +227,9 @@ function Listeners {
     #$httpsThreadStart = [System.Threading.ThreadStart]{
     while ($httpsListener.IsListening) {
         try {
+            write-host "Really listening to the try loop"
             $httpsContext = $httpsListener.GetContext()
+            Write-Host "Got Context...handling"
             Handle-Request -context $httpsContext
         } catch {
             Write-Host "HTTPS Listener encountered an error: $_"
