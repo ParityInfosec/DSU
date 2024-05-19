@@ -89,7 +89,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         clean_hosts(host)                                                       # Unblock link long enough to expand url
         expanded_url = expand_url(original_url)                                 # Deobfuscate shortened link
         load_hosts(shortURLs)                                                   # Reblock site
-
+        print(expanded_url)
         # If link can be deobfuscated...
         if expanded_url:
             output = check_site(expanded_url.headers.get('Host'))               # Query VirusTotal
