@@ -65,9 +65,9 @@ def stop_proxy():
 
 # API to VirusTotal for site check
 def check_site(url):
-    domain = urlparse(url).hostname
+    print(url)
     headers = {"accept": "application/json", "x-apikey": apiKey}
-    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{domain}/votes', headers=headers)
+    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{url}/votes', headers=headers)
     return response.text
 
 # Display links & site check results
@@ -104,7 +104,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
                 self.send_response(403)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
-                self.wfile.write(f"Access denied: The requested URL ({expanded_url}) is considered malicious.".encode('utf-8'))
+                self.wfile.write(f"Access denied: The requested URL ({expanded_url}) is potentially malicious.".encode('utf-8'))
         else:                                                   # If link can't be deobfuscated
             self.send_response(500)
             self.end_headers()
