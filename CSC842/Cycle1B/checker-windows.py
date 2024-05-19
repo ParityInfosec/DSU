@@ -24,6 +24,9 @@ apiKey = "ABCDE"
 # Hosts file path
 hostsFile = "C:\\Windows\\System32\\drivers\\etc\\hosts"
 
+# Stop event for threads
+stop_event = threading.Event()
+
 def expand_url(url):
     try:
         response = requests.head(url, allow_redirects=True)
