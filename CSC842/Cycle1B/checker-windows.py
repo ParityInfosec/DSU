@@ -51,6 +51,7 @@ def stop_proxy():
 def convert_to_base64_url(url):
     url_bytes = url.encode('utf-8')
     base64_bytes = base64.urlsafe_b64encode(url_bytes)
+    print(base64_bytes)
     return base64_bytes.decode('utf-8').rstrip('=')
 
 def check_site(url):
