@@ -74,8 +74,9 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         protocol = 'https' if self.server.server_port ==8081 else 'http'
         host = self.headers.get('Host')
         original_url = (f"{protocol}://{host}{self.path}")
-        print(original_url)
+        clean_hosts(host)
         expanded_url = expand_url(original_url)
+        load_hosts(host)
         print(expanded_url)
         if expanded_url:
             output = check_site(expanded_url)
@@ -124,27 +125,27 @@ def start_https_server():
         httpd.handle_request()
     httpd.server_close()
 
-def load_hosts():
+def load_hosts(urls):
     with open(hostsFile, 'a+') as file:
         file.seek(0)
         lines = file.readlines()
-        for shortURL in shortURLs:
-            entry = f"127.0.0.1 {shortURL}\n"
+        for url in urls:
+            entry = f"127.0.0.1 {url}\n"
             if entry not in lines:
                 file.write(entry)
 
-def clean_hosts():
+def clean_hosts(urls):
     with open(hostsFile, 'r') as file:
         lines = file.readlines()
     with open(hostsFile, 'w') as file:
         for line in lines:
-            if not any(shortURL in line for shortURL in shortURLs):
+            if not any(url in line for url in urls):
                 file.write(line)
 
 if __name__ == "__main__":
     try:
         print("Press Ctrl+C to stop the script...")
-        load_hosts()
+        load_hosts(shortURLs)
         start_proxy()
         http_thread = threading.Thread(target=start_http_server, daemon=True)
         https_thread = threading.Thread(target=start_https_server, daemon=True)
@@ -159,11 +160,11 @@ if __name__ == "__main__":
         http_thread.join()
         https_thread.join()
         print("Threads joined...Cleaning Hosts file")
-        clean_hosts()
+        clean_hosts(shortURLs)
         stop_proxy()
     finally:
         stop_event.set()
         http_thread.join()
         https_thread.join()
-        clean_hosts()
+        clean_hosts(shortURLs)
         stop_proxy()
