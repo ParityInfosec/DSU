@@ -4,6 +4,7 @@ import http.server
 import threading
 import requests
 import subprocess
+import base64
 from urllib.parse import urlparse
 from tkinter import Tk, messagebox
 
