@@ -55,7 +55,7 @@ def convert_to_base64_url(url):
 def check_site(url):
     base64dom = convert_to_base64_url(url)
     headers = {"accept": "application/json", "x-apikey": apiKey}
-    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{base64dom}', headers=headers)
+    response = requests.get(f'https://www.virustotal.com/api/v3/urls/{base64dom}/votes?limit=10', headers=headers)
     return response.json()
 
 def show_options_box(message):
