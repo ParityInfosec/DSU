@@ -253,7 +253,7 @@ function Listeners {
 
     # Stop the listeners
     #$httpListener.Stop()
-    #$httpsListener.Stop()
+    $httpsListener.Stop()
     #Write-Host "Threads stopped"
 }
 
