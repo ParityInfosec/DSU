@@ -116,6 +116,7 @@ def start_https_server():
 
 def load_hosts():
     with open(hostsFile, 'a+') as file:
+        file.seek(0)
         lines = file.readlines()
         for shortURL in shortURLs:
             entry = f"127.0.0.1 {shortURL}\n"
@@ -135,8 +136,8 @@ if __name__ == "__main__":
         print("Press Ctrl+C to stop the script...")
         load_hosts()
         start_proxy()
-        http_thread = threading.Thread(target=start_http_server)
-        https_thread = threading.Thread(target=start_https_server)
+        http_thread = threading.Thread(target=start_http_server, daemon=True)
+        https_thread = threading.Thread(target=start_https_server, daemon=True)
         http_thread.start()
         https_thread.start()
         while http_thread.is_alive() or https_thread.is_alive():
