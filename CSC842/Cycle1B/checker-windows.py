@@ -67,8 +67,8 @@ def stop_proxy():
 def check_site(url):
     domain = urlparse(url).hostname
     headers = {"accept": "application/json", "x-apikey": apiKey}
-    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{domain}', headers=headers)
-    return response.json()
+    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{domain}/votes', headers=headers)
+    return response.text
 
 # Display links & site check results
 def show_options_box(url, expanded_url, message):
