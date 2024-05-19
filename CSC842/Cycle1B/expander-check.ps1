@@ -261,7 +261,7 @@ function LoadHosts {
         $entry = "127.0.0.1 $shortURL"
         Write-Host "gc $hostsFile"
         Write-Host $entry
-        if ((gc $hostsFile -raw) -notmatch $entry) {
+        if ((gc -Path $hostsFile -raw) -notmatch $entry) {
             $queue += "$entry`n"
             Write-Host "host written: $entry"
         } else {
