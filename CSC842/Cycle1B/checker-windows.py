@@ -1,13 +1,10 @@
-import os
-import sys
-import base64
-import requests
-import threading
-import http.server
 import ssl
+import http.server
+import threading
+import requests
+import subprocess
 from urllib.parse import urlparse
 from tkinter import Tk, messagebox
-import subprocess
 
 # Define known short URL services
 shortURLs = [
@@ -78,9 +75,28 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
             self.send_response(500)
             self.end_headers()
 
-def start_server():
-    httpd = http.server.HTTPServer(('127.0.0.1', 8080), RequestHandler)
-    httpd.socket = ssl.wrap_socket(httpd.socket, certfile='./certificate.pem', server_side=True) 
+class HTTPRequestHandler(RequestHandler):
+    pass
+
+class HTTPSRequestHandler(RequestHandler):
+    pass
+
+def start_http_server():
+    httpd = http.server.HTTPServer(('127.0.0.1', 8080), HTTPRequestHandler)
+    print("HTTP Server running on http://127.0.0.1:8080")
+    httpd.serve_forever()
+
+def start_https_server():
+    httpd = http.server.HTTPServer(('127.0.0.1', 8081), HTTPSRequestHandler)
+
+    # Create SSL context
+    context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+    context.load_cert_chain(certfile='./certificate.pem', keyfile='./privatekey.pem')
+
+    # Wrap the socket
+    httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
+
+    print("HTTPS Server running on https://127.0.0.1:8081")
     httpd.serve_forever()
 
 def load_hosts():
@@ -105,7 +121,8 @@ if __name__ == "__main__":
         print("Press Ctrl+C to stop the script...")
         load_hosts()
         start_proxy()
-        threading.Thread(target=start_server).start()
+        threading.Thread(target=start_http_server).start()
+        threading.Thread(target=start_https_server).start()
         while True:
             pass
     except KeyboardInterrupt:
