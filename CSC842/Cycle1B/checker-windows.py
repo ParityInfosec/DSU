@@ -74,7 +74,7 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         original_url = (f"{protocol}://{host}{self.path}")
         clean_hosts(host)
         expanded_url = expand_url(original_url)
-        load_hosts(host)
+        load_hosts(shortURLs)
         print(expanded_url)
         if expanded_url:
             output = check_site(expanded_url)
