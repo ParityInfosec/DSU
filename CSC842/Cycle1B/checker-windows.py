@@ -65,8 +65,9 @@ def stop_proxy():
 
 # API to VirusTotal for site check
 def check_site(url):
+    domain = urlparse(url).hostname
     headers = {"accept": "application/json", "x-apikey": apiKey}
-    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{base64dom}', headers=headers)
+    response = requests.get(f'https://www.virustotal.com/api/v3/domains/{domain}', headers=headers)
     return response.json()
 
 # Display links & site check results
@@ -92,8 +93,8 @@ class RequestHandler(http.server.BaseHTTPRequestHandler):
         print(expanded_url)
         # If link can be deobfuscated...
         if expanded_url:
-            output = check_site(expanded_url.headers.get('Host'))               # Query VirusTotal
-            options_choice = show_options_box(original_url, expanded_url, output)             # Display Continue/Quit box with VirusTotal info
+            output = check_site(urlparse(expanded_url).hostname)                            # Query VirusTotal
+            options_choice = show_options_box(original_url, expanded_url, output)           # Display Continue/Quit box with VirusTotal info
 
             if options_choice:                                  # If Yes, continue
                 self.send_response(302)
