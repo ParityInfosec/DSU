@@ -63,6 +63,8 @@ def show_options_box(message):
 
 class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
+        print(self.headers.get('Host'))
+        print(f"http://{host}/{self.path}")
         original_url = self.path[1:]  # Remove leading '/'
         expanded_url = expand_url(original_url)
         if expanded_url:
@@ -102,9 +104,6 @@ def start_https_server():
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
     certpath = path + '\certificate.pem'
     keypath = path + '\privkey.pem'
-    print(certpath)
-    print(keypath)
-
     context.load_cert_chain(certfile=certpath, keyfile=keypath)
 
     # Wrap the socket
