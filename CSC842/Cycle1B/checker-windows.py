@@ -78,6 +78,9 @@ def check_site(url):
 def show_options_box(message):
     root = Tk()
     root.withdraw()  # Hide the root window
+    root.attributes("-topmost", True)  # Make sure the root window is on top
+    root.update()  # Update the window to ensure it processes the above changes
+
     result = messagebox.askyesno("Redirect Link Alert", f"{message}\n\nDo you want to continue?")
     root.destroy()
     return result       # Use results to determine if traffic passes
