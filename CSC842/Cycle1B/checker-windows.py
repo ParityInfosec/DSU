@@ -105,7 +105,6 @@ def start_https_server():
 
 def load_hosts():
     with open(hostsFile, 'a+') as file:
-        file.seek(0)
         lines = file.readlines()
         for shortURL in shortURLs:
             entry = f"127.0.0.1 {shortURL}\n"
