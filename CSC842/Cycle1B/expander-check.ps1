@@ -257,10 +257,9 @@ function Listeners {
 
 # Force known URL shortners through local proxy/checks
 function LoadHosts {
-    $hostsContent = (gc $hostsFile)
     foreach ($shortURL in $shortURLs) {
         $entry = "127.0.0.1 $shortURL"
-        if (($hostsContent) -notmatch $entry) {
+        if ((gc $hostsFile) -notmatch $entry) {
             $queue += "$entry`n"
             Write-Host "host written: $entry"
         } else {
