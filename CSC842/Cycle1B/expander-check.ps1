@@ -262,7 +262,9 @@ function LoadHosts {
     }
 }
 
-
+#GoTime
+LoadHosts
+StartProxy
 
 try {
     Write-Host "Press Ctrl+C to stop the script..."
