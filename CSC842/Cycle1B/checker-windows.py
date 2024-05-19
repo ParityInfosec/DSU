@@ -88,7 +88,9 @@ class HTTPSRequestHandler(RequestHandler):
 def start_http_server():
     httpd = http.server.HTTPServer(('127.0.0.1', 8080), HTTPRequestHandler)
     print("HTTP Server running on http://127.0.0.1:8080")
-    httpd.serve_forever()
+    while not stop_event.is_set():
+        httpd.handle_request()
+    httpd.server_close()
 
 def start_https_server():
     httpd = http.server.HTTPServer(('127.0.0.1', 8081), HTTPSRequestHandler)
@@ -103,7 +105,9 @@ def start_https_server():
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
 
     print("HTTPS Server running on https://127.0.0.1:8081")
-    httpd.serve_forever()
+    while not stop_event.is_set():
+        httpd.handle_request()
+    httpd.server_close()
 
 def load_hosts():
     with open(hostsFile, 'a+') as file:
@@ -126,12 +130,23 @@ if __name__ == "__main__":
         print("Press Ctrl+C to stop the script...")
         load_hosts()
         start_proxy()
-        threading.Thread(target=start_http_server).start()
-        threading.Thread(target=start_https_server).start()
-        while True:
-            pass
+        http_thread = threading.Thread(target=start_http_server)
+        https_thread = threading.Thread(target=start_https_server)
+        http_thread.start()
+        https_thread.start()
+        while http_thread.is_alive() or https_thread.is_alive():
+            http_thread.join(1)
+            https_thread.join(1)
     except KeyboardInterrupt:
         print("Stopping the script...")
+        stop_event.set()
+        http_thread.join()
+        https_thread.join()
         clean_hosts()
         stop_proxy()
-        exit()
+    finally:
+        stop_event.set()
+        http_thread.join()
+        https_thread.join()
+        clean_hosts()
+        stop_proxy()
