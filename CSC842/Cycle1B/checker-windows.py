@@ -34,8 +34,6 @@ def expand_url(url):
         if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
             url = response.headers['Location']
             print(f"Expanded...{url}")
-        else:
-            break
         return url
     except requests.RequestException as e:
         print(f"Error expanding URL: {e}")
