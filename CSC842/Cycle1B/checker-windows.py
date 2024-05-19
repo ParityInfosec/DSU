@@ -95,7 +95,9 @@ def start_https_server():
 
     # Create SSL context
     context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
-    context.load_cert_chain(certfile=os.path.join(path, 'certificate.pem'), keyfile=os.path.join(path, 'privatekey.pem'))
+    certpath = os.path.join(path, 'certificate.pem')
+    keypath = os.path.join(path, 'privatekey.pem')
+    context.load_cert_chain(certfile=certpath, keyfile=keypath)
 
     # Wrap the socket
     httpd.socket = context.wrap_socket(httpd.socket, server_side=True)
@@ -132,4 +134,4 @@ if __name__ == "__main__":
         print("Stopping the script...")
         clean_hosts()
         stop_proxy()
-        exit
+        exit()
