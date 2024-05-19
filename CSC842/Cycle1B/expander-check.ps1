@@ -181,7 +181,7 @@ function Listeners {
         $response = $context.Response
         Write-Host $context
         Write-Host $request
-        
+
         # Extract the original requested link
         $originalUrl = $request.Url.AbsoluteUri
         $expandedUrl = ExpandURL($originalUrl)
@@ -222,6 +222,7 @@ function Listeners {
         try {
             $httpContext = $httpListener.GetContext()
             Handle-Request -context $httpContext
+            Write-Host "Handling Finished"
         } catch {
             Write-Host "HTTP Listener encountered an error: $_"
         }
