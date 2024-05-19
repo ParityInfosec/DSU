@@ -65,8 +65,11 @@ def show_options_box(message):
 class RequestHandler(http.server.BaseHTTPRequestHandler):
     def do_GET(self):
         protocol = 'https' if self.server.server_port ==8081 else 'http'
-        original_url = (f"{protocol}://{self.headers.get('Host')}/{self.path}")
+        host = self.headers.get('Host')
+        original_url = (f"{protocol}://{host}/{self.path}")
+        print(original_url)
         expanded_url = expand_url(original_url)
+        print(expanded_url)
         if expanded_url:
             output = check_site(expanded_url)
             options_choice = show_options_box(output)
