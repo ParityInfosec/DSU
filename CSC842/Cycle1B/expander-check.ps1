@@ -287,13 +287,13 @@ function CleanHosts {
 LoadHosts
 StartProxy
 Clear-DnsClientCache
-Listeners
+
 
 try {
     Write-Host "Press Ctrl+C to stop the script..."
     while ($true) {
         # Start & Run Listeners
-        
+        Listeners
         Start-Sleep -Seconds 1
     }
 }
