@@ -1,5 +1,7 @@
 # MagentoScan
 
+Video: https://youtu.be/px_GIKOMqGM
+
 ## Intro
 In the past, I was really interested in webscraping and data collection, but websites have gotten quite complicated. With varying frameworks and languages, it can be deceptively tricky to extract targeted data from sites using a litany of tools: cURL, wget, Puppeteer, Selenium, Mechanize, Postman, etc. The biggest challenge I have routinely encountered has been website’s that go beyond public GET requests and involve more human interaction. 
 
