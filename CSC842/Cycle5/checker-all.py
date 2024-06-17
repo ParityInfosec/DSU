@@ -62,7 +62,7 @@ def expand_url(url):
 def start_proxy():
     if platform.system() == "Linux":
         subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "OUTPUT", "-d", "127.0.0.1", "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", "8080"])
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "OUTPUT", "-d", "127.0.0.1" "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", "8081"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "OUTPUT", "-d", "127.0.0.1", "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", "8081"])
     elif platform.system() == "Windows":
         subprocess.run(["netsh", "interface", "portproxy", "add", "v4tov4", "listenport=80", "listenaddress=127.0.0.1", "connectport=8080", "connectaddress=127.0.0.1"])
         subprocess.run(["netsh", "interface", "portproxy", "add", "v4tov4", "listenport=443", "listenaddress=127.0.0.1", "connectport=8081", "connectaddress=127.0.0.1"])
@@ -70,8 +70,8 @@ def start_proxy():
 # Stop forwarding
 def stop_proxy():
     if platform.system() == "Linux":
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "OUTPUT", "-d", "127.0.0.1" "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", "8080"])
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "OUTPUT", "-d", "127.0.0.1" "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", "8081"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "OUTPUT", "-d", "127.0.0.1", "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", "8080"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "OUTPUT", "-d", "127.0.0.1", "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", "8081"])
     if platform.system() == "Windows":
         subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=80", "listenaddress=127.0.0.1"])
         subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=443", "listenaddress=127.0.0.1"])
