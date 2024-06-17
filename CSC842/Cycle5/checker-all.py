@@ -48,7 +48,8 @@ stop_event = threading.Event()
 def expand_url(url):
     try:
         print(f"Expanding...{url}")
-        response = requests.get(url, allow_redirects=False, timeout=10)
+        response = requests.get(url, allow_redirects=False, timeout=7)
+        load_hosts(shortURLs)                                                   # Reblock site
         if response.status_code in (301, 302, 303, 307, 308) and 'Location' in response.headers:
             url = response.headers['Location']
             print(f"Expanded...{url}")
@@ -60,8 +61,8 @@ def expand_url(url):
 # Forward 80/443 to 8080/8081
 def start_proxy():
     if platform.system() == "Linux":
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-port", "8080"])
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "PREROUTING", "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-port", "8081"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "OUTPUT", "-d", "127.0.0.1", "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", "8080"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-A", "OUTPUT", "-d", "127.0.0.1" "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", "8081"])
     elif platform.system() == "Windows":
         subprocess.run(["netsh", "interface", "portproxy", "add", "v4tov4", "listenport=80", "listenaddress=127.0.0.1", "connectport=8080", "connectaddress=127.0.0.1"])
         subprocess.run(["netsh", "interface", "portproxy", "add", "v4tov4", "listenport=443", "listenaddress=127.0.0.1", "connectport=8081", "connectaddress=127.0.0.1"])
@@ -69,8 +70,8 @@ def start_proxy():
 # Stop forwarding
 def stop_proxy():
     if platform.system() == "Linux":
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "PREROUTING", "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-port", "8080"])
-        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "PREROUTING", "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-port", "8081"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "OUTPUT", "-d", "127.0.0.1" "-p", "tcp", "--dport", "80", "-j", "REDIRECT", "--to-ports", "8080"])
+        subprocess.run(["sudo", "iptables", "-t", "nat", "-D", "OUTPUT", "-d", "127.0.0.1" "-p", "tcp", "--dport", "443", "-j", "REDIRECT", "--to-ports", "8081"])
     if platform.system() == "Windows":
         subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=80", "listenaddress=127.0.0.1"])
         subprocess.run(["netsh", "interface", "portproxy", "delete", "v4tov4", "listenport=443", "listenaddress=127.0.0.1"])
