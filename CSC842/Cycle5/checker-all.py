@@ -20,6 +20,7 @@ import argparse
 import platform                 # Much better than os for cross platform
 from urllib.parse import urlparse
 from tkinter import Tk, messagebox
+from collections import Counter
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
@@ -81,12 +82,16 @@ def check_site(url):
     print(url)
     headers = {"accept": "application/json", "x-apikey": apiKey}
     response = requests.get(f'https://www.virustotal.com/api/v3/domains/{url}/votes', headers=headers)
-    
+    results = "Rating:\n" 
     # Load JSON data
     data = response.json()
     # Extract the "verdict" fields
     verdicts = [item['attributes']['verdict'] for item in data['data']]
-    return verdicts
+    counter = Counter(verdicts)
+
+    for value, count in counter.items():
+        results = results + f"{value} : {(count/(sum(counter.values())))*100:.2f}%\n"
+    return results
 
 # Display links & site check results
 def show_options_box(url, expanded_url, message):
