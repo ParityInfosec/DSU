@@ -166,28 +166,20 @@ def load_hosts(urls):
     with open(hostsFile, 'a+') as file:
         file.seek(0)
         lines = file.readlines()                                       # Read hosts file
-
-        # Prevent tool from wiping out original /etc/hosts info
-        existing_entries = set(lines)
-
         for url in urls:
             entry = f"127.0.0.1 {url}\n"                               # Build hosts lines
-            if entry not in existing_entries:                                      
+            if entry not in lines:                                      
                 file.write(entry)                                      # Check if url is in hosts file; if not, write entry to hosts
-                existing_entries.add(entry)                             # append to prevent duplicate writes
 
 # Remove URL shortners from .../etc/hosts; can be full list or individual sites (for "unblocking")
 def clean_hosts(urls):
     global hostsFile
     with open(hostsFile, 'r') as file:
         lines = file.readlines()                                       # Read hosts file
-    # Prevent tool from wiping out original /etc/hosts info
-    filtered_lines = [line for line in lines if not any(url in line for url in urls)]
-
     with open(hostsFile, 'w') as file:
         for line in lines:
             if not any(url in line for url in urls):                   # If content is not a url in array, write to file; deletes added references
-                file.writelines(filtered_lines)
+                file.write(line)
 
 
 # Initialize functions pre-main
