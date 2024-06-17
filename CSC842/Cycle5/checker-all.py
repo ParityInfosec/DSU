@@ -160,24 +160,24 @@ def start_https_server():
     httpd.server_close()
 
 # "Blackhole" URL shorteners to localhost in .../etc/hosts
-def load_hosts():
-    global hostsFile, shortURLs
+def load_hosts(urls):
+    global hostsFile
     with open(hostsFile, 'a+') as file:
         file.seek(0)
         lines = file.readlines()                                       # Read hosts file
-        for url in shortURLs:
+        for url in urls:
             entry = f"127.0.0.1 {url}\n"                               # Build hosts lines
             if entry not in lines:                                      
                 file.write(entry)                                      # Check if url is in hosts file; if not, write entry to hosts
 
 # Remove URL shortners from .../etc/hosts; can be full list or individual sites (for "unblocking")
-def clean_hosts():
-    global hostsFile, shortURLs
+def clean_hosts(urls):
+    global hostsFile
     with open(hostsFile, 'r') as file:
         lines = file.readlines()                                       # Read hosts file
     with open(hostsFile, 'w') as file:
         for line in lines:
-            if not any(url in line for url in shortURLs):                   # If content is not a url in array, write to file; deletes added references
+            if not any(url in line for url in urls):                   # If content is not a url in array, write to file; deletes added references
                 file.write(line)
 
 
@@ -190,7 +190,7 @@ if platform.system() == "Linux":
     subprocess.run(["sudo", "systemctl", "restart", "NetworkManager"])
 elif platform.system() == "Windows":
     hostsFile = "C:\\Windows\\System32\\drivers\\etc\\hosts"
-load_hosts()
+load_hosts(shortURLs)
 
 
 if __name__ == "__main__":
@@ -215,11 +215,11 @@ if __name__ == "__main__":
         http_thread.join()
         https_thread.join()
         print("Threads joined...Cleaning Hosts file")   
-        clean_hosts()
+        clean_hosts(shortURLs)
         stop_proxy()
     finally:                                                                                   # Ensure cleanup if error not caught
         stop_event.set()
         http_thread.join()
         https_thread.join()
-        clean_hosts()
+        clean_hosts(shortURLs)
         stop_proxy()
