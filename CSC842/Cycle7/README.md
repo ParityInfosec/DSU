@@ -6,16 +6,17 @@ Other options (like www.osforensics.com) can test for misnamed files, but it is 
 ## Todo
 - Determine OS/arch
     - Need to match up the correct library for the python-magic checks
-- os.walk() the system
-  > for _ , _ , file in os.walk("/")
-    -  Perform timestomp check
+- os.walk() the system        [DONE]
+  > for _ , _ , file in os.walk("/")       [DONE]
+    -  Perform timestomp check         [Perform with pytsk3 or create my own?]
     -  Was this in the engagement window
        -  If no, break
     -  Perform file mismatch check
        - If possible misnamed, is a critical file type or magic code?
        - Does it contain things like php code in non-php
-- Check /etc/hosts for any 127.0.0.1
-- Check for any listeners and the processes attached (with user)?
+- Check /etc/hosts for any 127.0.0.1         [DONE]
+   - Add checks for other /etc/hosts entries that bypass DNS?  regex [x.x.x.x name\.**]
+- Check for any listeners and the processes attached (with user)? psutil
 - Check for +x properties
 
 
@@ -23,10 +24,10 @@ Other options (like www.osforensics.com) can test for misnamed files, but it is 
 -  reuse their code for the MITRE attack and threat info?
 
 ### Arguments
-- Engagement Start
-- Engagement Stop (defaults to present/now())
-- Starting location (if not desired to be root folder)
-   - tkinter file select popup
+- Engagement Start   [DONE]
+- Engagement Stop    [DONE]
+- Starting location (if not desired to be root folder)   [DONE]
+   - tkinter file select popup       [DONE]
 
 
 ### Requirements
@@ -34,3 +35,8 @@ Other options (like www.osforensics.com) can test for misnamed files, but it is 
 - python-magic
    - pip install python-magic
 - libhash
+- prettytable
+- tkinter
+- tkcalendar
+- psutil
+- platform

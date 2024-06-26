@@ -9,19 +9,15 @@ Project/Lab: Cycle 7 - SHut Em Down (SHED)
 ----------	---	----------------------------------------------------------
 '''
 
-from ast import parse
 import os
-from tabnanny import check
-import threading
-import base64
 import argparse
+import psutil
 import platform                 # Much better than os for cross platform
 import tkinter as tk
+from prettytable import PrettyTable
 from datetime import datetime
 from tkcalendar import Calendar
-from urllib.parse import urlparse
 from tkinter import ttk, filedialog
-from collections import Counter
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
@@ -92,6 +88,26 @@ def check_hosts(filename):
                 # Print the line, stripping newline characters for clean output
                 print(line.strip())
 
+def check_connects():
+    # Create a table with the desired columns
+    table = PrettyTable()
+    table.field_names = ["Local Address", "Remote Address", "Status", "PID"]
+
+    # Fetch all inet connections (this includes TCP and UDP over IPv4 and IPv6)
+    connections = psutil.net_connections(kind='inet')
+
+    # Process each connection
+    for conn in connections:
+        # Prepare local and remote addresses
+        laddr = f"{conn.laddr.ip}:{conn.laddr.port}" if conn.laddr else "N/A"
+        raddr = f"{conn.raddr.ip}:{conn.raddr.port}" if conn.raddr else "N/A"
+
+        # Add a row to the table
+        table.add_row([laddr, raddr, conn.status, conn.pid])
+
+    # Print the table
+    print(table)
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SHut Em Down (SHED)")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
@@ -122,7 +138,7 @@ if __name__ == "__main__":
     # Print headers/breaks
     check_hosts(hostsFile)
     # Print headers/breaks
-
+    check_connects()
     count = 0
     print(start_engage, end_engage, top_folder)
     for _, dirs, _ in os.walk(top_folder):
