@@ -31,6 +31,7 @@ Additionally, this can be extended to environments where you must remain inside 
 - Fine tune for MacOS 
 - Cross-reference multiple data sources for a custom malware "score"
 - Build in a malware list checker that always denies malicious domains with no user option to continue
+- Store cached URLs
 
 ## Resources
 Virus Total API - https://docs.virustotal.com/reference/overview
