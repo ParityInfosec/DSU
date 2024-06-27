@@ -9,18 +9,34 @@ Project/Lab: Cycle 7 - SHut Em Down (SHED)
 ----------	---	----------------------------------------------------------
 '''
 
+global import_failure
+import_failure = False
 import os
+import socket
 import argparse
 import psutil
 import platform                 # Much better than os for cross platform
-import tkinter as tk
 from prettytable import PrettyTable
 from datetime import datetime
-from tkcalendar import Calendar
-from tkinter import ttk, filedialog
+# Test for imports tied to GUIs; fail back to CLI and continue if not available
+try:
+    import tkinter as tk
+    from tkcalendar import Calendar
+    from tkinter import ttk, filedialog
+except ImportError:
+    print(f"Warning: Could not import {module_name}. GUI options not available.")
+    import_failure = True
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
+
+#################################################### Display / UI 
+# Custom pretty print header format
+def print_head(header):
+    print("\n\r" + "=" *95)
+    print(f"{header}")
+    print("=" *95)
+
 
 def select_date(title_msg):
     # Create a popup window
@@ -49,6 +65,33 @@ def select_date(title_msg):
     popup.mainloop()
     return selected_date.get('date')  # Retrieve the date from the dictionary
 
+def get_date(prompt="Enter the date (MM/DD/YY): "):
+    while True:
+        date_str = input(prompt)
+        try:
+            # Try to convert the string to a datetime object
+            date_in = datetime.datetime.strptime(date_str, "%m/%d/%Y")
+            return date_in
+        except ValueError:
+            print("Invalid date format. Please try again.")
+
+def get_directory(prompt="Please enter a directory path: "):
+    while True:
+        directory = input(prompt)
+        # Check if the provided path is a valid directory
+        if os.path.isdir(directory):
+            return directory
+        else:
+            print(f"Error: '{directory}' is not a valid directory. Please try again.")
+
+def get_ips():
+    ip_addresses = []
+    for interface_name, interface_addresses in psutil.net_if_addrs().items():
+        for address in interface_addresses:
+            if address.family == socket.AF_INET:
+                ip_addresses.append(address.address)
+    return ip_addresses
+
 def open_folder_picker():
     # Create the main window
     root = tk.Tk()
@@ -62,7 +105,7 @@ def open_folder_picker():
     def select_folder():
         nonlocal folder_path
         foldername = filedialog.askdirectory(
-            initialdir="/",  # Set to your preferred starting directory
+            initialdir=".",  # Set to your preferred starting directory
             title="Select a folder"
         )
         folder_path = foldername if foldername else "No folder selected"
@@ -83,64 +126,143 @@ def check_hosts(filename):
     with open(filename, 'r') as file:
         # Iterate over each line in the file
         for line in file:
-            # Check if the line starts with the specified string
-            if line.startswith("127.0.0.1"):
-                # Print the line, stripping newline characters for clean output
+            # Only print lines with DNS entries
+            if not line.startswith("#"):
                 print(line.strip())
 
 def check_connects():
     # Create a table with the desired columns
     table = PrettyTable()
-    table.field_names = ["Local Address", "Remote Address", "Status", "PID"]
+    table.field_names = ["Local Address", "Local Port", "Status", "PID", "Process"]
 
-    # Fetch all inet connections (this includes TCP and UDP over IPv4 and IPv6)
+    # Fetch all inet connections (TCP/UDP over IPv4/IPv6)
     connections = psutil.net_connections(kind='inet')
 
-    # Process each connection
+    # Process each connection to find any listeners
     for conn in connections:
-        # Prepare local and remote addresses
-        laddr = f"{conn.laddr.ip}:{conn.laddr.port}" if conn.laddr else "N/A"
-        raddr = f"{conn.raddr.ip}:{conn.raddr.port}" if conn.raddr else "N/A"
-
-        # Add a row to the table
-        table.add_row([laddr, raddr, conn.status, conn.pid])
+        if conn.status == 'LISTEN':
+            # Prepare local and remote addresses
+            laddr = f"{conn.laddr.ip}" if conn.laddr else "N/A"
+            lport = f"{conn.laddr.port}" if conn.laddr else "N/A"
+            pname = f"{psutil.Process(conn.pid).name()}"
+            # Add a row to the table
+            table.add_row([laddr, lport, conn.status, conn.pid, pname])
 
     # Print the table
     print(table)
+
+def check_file(file, start_date, end_date):   # Not working
+    create = os.path.getctime(file)
+    access = os.path.getatime(file)
+    modify = os.path.getmtime(file)
+    '''
+    if modify < create or access < create:
+        print('***** Potential Timestomp ******')
+    '''
+
+    date_format = "%m/%d/%y"
+    in_window,is_executable, poss_stomp = False, False, False
+    # Parse the date string into a datetime object
+    start = int(datetime.strptime(start_date, date_format).timestamp())
+    end = int(datetime.strptime(end_date, date_format).timestamp())
+
+    if create < end and create > start:
+        print(f"created {file} on {create}, in window")
+        in_window = True
+    if access < end and access > start:
+        print(f"accessed {file} on {access}, in window")
+        in_window = True
+    if modify < end and modify > start:
+        print(f"modified {file} on {modify}, in window")
+        in_window = True
+    if os.access(file, os.X_OK) and in_window:
+        print(f"{file} is executable & in window")
+        is_executable = True    
+    return in_window, is_executable, poss_stomp
+    
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SHut Em Down (SHED)")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
-    parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')
+    parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')   # Set to . for testing phase
     parser.add_argument('-F', '--folder', action='store_true', help='Enable top folder picker')
     parser.add_argument('-G', '--gui', action='store_true', help='Enable GUI display')      # Not functioning yet
     args = parser.parse_args()
 
+    print_head("System Details...")
     if platform.system() == "Linux":
+        OS_type = "Linux"
+        hostsFile = "/etc/hosts"
+    elif platform.system() == "Darwin":
+        OS_type = "MacOS"
         hostsFile = "/etc/hosts"
     elif platform.system() == "Windows":
+        OS_type = "Windows"
         hostsFile = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    print(OS_type)
+    print(platform.node())
+    ipv4s = get_ips()
+    for ip in ipv4s:
+        print(ip)
 
     start_engage = args.start
     end_engage = args.end
     top_folder = args.location
 
-    if not(start_engage):
-        start_engage = select_date("Select Start Date")
-    if not(end_engage):
-        end_engage = select_date("Select End Date")
-    if not(top_folder):
-        top_folder = '/'
-    if args.folder:
-        top_folder = open_folder_picker()
-   
-    # Print headers/breaks
+    print_head("Engagement Window")
+    if args.gui or import_failure:
+        if not(start_engage):
+            print("Enter Start Date")
+            start_engage = get_date()
+        if not(end_engage):
+            print("Enter End Date")
+            end_engage = get_date()
+        print(f"Start: {start_engage}")
+        print(f"End:   {end_engage}")
+        print_head("Folder Structure...")
+        if not(top_folder):
+            top_folder = get_directory()
+        if args.folder:
+            print("Folder picker not available in GUI mode.")
+            top_folder = get_directory()
+        print(top_folder)
+    else:
+        if not(start_engage):
+            start_engage = select_date("Select Start Date")
+        if not(end_engage):
+            end_engage = select_date("Select End Date")
+        print(f"Start: {start_engage}")
+        print(f"End: {end_engage}")
+        print_head("Folder Structure...")
+        if not(top_folder):
+            top_folder = '.'
+        if args.folder:
+            top_folder = open_folder_picker()
+        print(top_folder)
+    
+    print_head("Checking hosts files...")
     check_hosts(hostsFile)
-    # Print headers/breaks
+
+    print_head("Checking for Listeners...")
     check_connects()
+    
     count = 0
-    print(start_engage, end_engage, top_folder)
-    for _, dirs, _ in os.walk(top_folder):
+    engagement_files = []
+    executable_files = []
+
+    print_head("Checking files for changes during engagment window...")
+    for root, dirs, files in os.walk(top_folder):
+        for file in files:
+            filepath = os.path.join(root, file)
+            in_window, is_executable, poss_stomp = check_file(filepath, start_engage, end_engage)             # Not working
+            if in_window:
+                engagement_files.append(filepath)
+            if is_executable:
+                executable_files.append(filepath)
         count += 1
     print(count)
+    print_head("Results Array...")
+    print(engagement_files)
+    print_head("Files in engagment that were executable...")
+    print(executable_files)
