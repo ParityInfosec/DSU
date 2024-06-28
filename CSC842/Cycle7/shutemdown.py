@@ -149,8 +149,23 @@ def get_win_user_creation_dates():
     result = subprocess.run(['powershell', '-Command', command], stdout=subprocess.PIPE, text=True)
 
     # Parse the JSON output
-    user_creation_dates = json.loads(result.stdout)
-    return user_creation_dates
+    # Check if the command executed successfully
+    if result.returncode != 0:
+        print("Error executing PowerShell command")
+        return []
+    
+    # Check if stdout is empty
+    if not result.stdout.strip():
+        print("No output from PowerShell command")
+        return []
+    
+    # Parse the JSON output
+    try:
+        user_creation_dates = json.loads(result.stdout)
+        return user_creation_dates
+    except json.JSONDecodeError as e:
+        print(f"Error decoding JSON: {e}")
+        return []
 
 def get_macos_user_list():
     try:
