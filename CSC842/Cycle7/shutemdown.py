@@ -19,6 +19,7 @@ import argparse
 import psutil
 import platform                 # Much better than os for cross platform
 import pytz
+import json
 from prettytable import PrettyTable
 from datetime import datetime
 # Test for imports tied to GUIs; fail back to CLI and continue if not available
