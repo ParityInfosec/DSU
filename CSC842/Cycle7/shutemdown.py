@@ -13,6 +13,7 @@ global import_failure
 import_failure = False
 import os
 import re
+import ctypes
 import socket
 import subprocess
 import argparse
@@ -281,6 +282,10 @@ def check_files(top_folder):
                     is_executable = True 
                 else:
                     is_executable = False
+                if OS_type == "Windows":
+                    attributes = GetFileAttributes(filepath)
+                    FILE_ATTRIBUTE_SYSTEM = 0x04
+                    is_executable = attributes & FILE_ATTRIBUTE_SYSTEM
                 filesTable.add_row([filepath, i[1], i[2], is_executable])
     print(filesTable)
 
