@@ -105,6 +105,7 @@ def get_date(prompt="Enter the date (MM/DD/YY): "):
         try:
             # Try to convert the string to a datetime object
             date_in = datetime.strptime(date_str, "%m/%d/%y")
+            date_in= date_in.strftime('%m/%d/%y')
             return date_in
         except ValueError:
             print("Invalid date format. Please try again.")
@@ -193,7 +194,6 @@ def get_mac_folder_creation_date(user):
         if match:
             creation_date_str = match.group(1).strip()
             creation_date = datetime.strptime(creation_date_str, '%Y-%m-%d %H:%M:%S %z')
-            #return creation_date.strftime('%Y-%m-%d %H:%M:%S')
             return creation_date.strftime('%m/%d/%y')
         else:
             print(f"Could not find creation date for folder: {folder_path}")
@@ -369,11 +369,9 @@ if __name__ == "__main__":
                 if create_date:
                     create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
                     create_date_ = create_date.strftime('%m/%d/%y')
-                    print(create_date)
                     print(f"User: {user}, Created on: {create_date}")
         except:      
             print(f"Error: Check Users Manually")
-
 
     print_head("Checking for Listeners...")
     check_connects()
