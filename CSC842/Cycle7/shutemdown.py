@@ -260,7 +260,7 @@ def check_file(file, start_date, end_date):   # Not working
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
     access_date = datetime.fromtimestamp(access, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
-    
+    print(start_date, end_date)
     print(create_date, access_date, modify_date)
     results = []
     if is_date_between(create_date,start_date,end_date):
