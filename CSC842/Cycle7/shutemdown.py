@@ -258,7 +258,7 @@ def check_file(file, start_date, end_date):   # Not working
     date_format = "%m/%d/%y"
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
-
+    print(file, start_date, end_date)
     results = []
     if is_date_between(create_date,start_date,end_date):
         results.append([True, "Create", create_date])
@@ -270,10 +270,9 @@ def check_files(top_folder):
     filesTable = PrettyTable()
     filesTable.field_names = ["File", "Type", "Date", "Executable?"]
     for root, dirs, files in os.walk(top_folder):
-        print(files)
         for file in files:
             filepath = os.path.join(root, file)
-            results = check_file(filepath, start_engage, end_engage)             # Not working
+            results = check_file(filepath, start_engage, end_engage)
             for i in results:
                 if OS_type == "Linux" or OS_type == "MacOS":
                     if os.access(filepath, os.X_OK):
