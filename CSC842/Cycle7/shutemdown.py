@@ -192,7 +192,7 @@ def get_mac_folder_creation_date(user):
         match = re.search(r'kMDItemFSCreationDate\s=\s(.+)', output)
         if match:
             creation_date_str = match.group(1).strip()
-            creation_date = datetime.strptime(creation_date_str, '%m/%d/%Y %H:%M:%S')
+            creation_date = datetime.strptime(creation_date_str, '%Y-%m-%d %H:%M:%S %z')
             #return creation_date.strftime('%Y-%m-%d %H:%M:%S')
             return creation_date.strftime('%m/%d/%y')
         else:
@@ -368,11 +368,11 @@ if __name__ == "__main__":
        # try:
         for user, create_date in user_creation_dates:
             print(user, "[[", create_date, "]]")
-            if user_creation_dates != "":
-                date_format = "%m/%d/%y"
-                create_date = datetime.fromtimestamp(create_date, pytz.UTC).strftime(date_format)
+            if user_creation_dates:
+                create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
+                create_date_ = create_date.strftime('%m/%d/%y')
                 print(create_date)
-                print(f"User: {user}, Created on: {creation_date}")
+                print(f"User: {user}, Created on: {create_date}")
             else:
                 print("No user creation dates found or error occurred")
         #except:      
