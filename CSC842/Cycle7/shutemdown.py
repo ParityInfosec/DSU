@@ -142,29 +142,31 @@ def get_win_user_creation_dates():
         "  $createdDate = (Get-WinEvent -FilterHashtable @{LogName='Security'; Id=4720} | "
         "    Where-Object { $_.Properties[0].Value -eq $user.Name } | "
         "    Select-Object -First 1 -ExpandProperty TimeCreated); "
-        "  [PSCustomObject]@{Name=$user.Name; CreationDate=$createdDate} "
-        "} | ConvertTo-Json"
+        "  \"$($user.Name),$($createdDate)\" "
+        "}"
     )
 
     result = subprocess.run(['powershell', '-Command', command], stdout=subprocess.PIPE, text=True)
-    # Parse the JSON output
+    
     # Check if the command executed successfully
     if result.returncode != 0:
         print("Error executing PowerShell command")
         return []
-    
+
     # Check if stdout is empty
     if not result.stdout.strip():
         print("No output from PowerShell command")
         return []
+
+    # Parse the output into a set of tuples
+    user_creation_dates = set()
+    for line in result.stdout.splitlines():
+        parts = line.split(',')
+        if len(parts) == 2:
+            username, creation_date = parts
+            user_creation_dates.add((username.strip(), creation_date.strip()))
     
-    # Parse the JSON output
-    try:
-        user_creation_dates = json.loads(result.stdout)
-        return user_creation_dates
-    except json.JSONDecodeError as e:
-        print(f"Error decoding JSON: {e}")
-        return []
+    return user_creation_dates
 
 def get_macos_user_list():
     try:
@@ -362,13 +364,17 @@ if __name__ == "__main__":
             print("No user accounts found or error occurred.")    
     elif OS_type == "Windows":
         user_creation_dates = get_win_user_creation_dates()
+        print(user_creation_dates)
         try:
             for user in user_creation_dates:
                 date_format = "%m/%d/%y"
                 create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
                 print(create_date)
-                if user['CreationDate'] and is_date_between(create_date, start_engage, end_engage):
-                    print(f"New User Found: {user['Name']}")
+                if user_creation_dates:
+                    for user, creation_date in user_creation_dates:
+                        print(f"User: {user}, Created on: {creation_date}")
+                else:
+                    print("No user creation dates found or error occurred")
         except:      
             print(f"Error: Check Users Manually")
 
