@@ -368,7 +368,7 @@ if __name__ == "__main__":
        # try:
         for user, create_date in user_creation_dates:
             print(user, "[[", create_date, "]]")
-            if user_creation_dates:
+            if user_creation_dates != "":
                 date_format = "%m/%d/%y"
                 create_date = datetime.fromtimestamp(create_date, pytz.UTC).strftime(date_format)
                 print(create_date)
