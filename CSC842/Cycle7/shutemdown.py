@@ -207,27 +207,10 @@ def get_linux_users_from_passwd():
     with open('/etc/passwd', 'r') as passwd_file:
         for line in passwd_file:
             parts = line.split(':')
-            if len(parts) > 1:
+            if len(parts) > 1 and parts[1] >=1000:
                 username = parts[0]
                 users.append(username)
     return users
-
-def get_linux_folder_creation_date(user):
-    try:
-        home_dir = f'/home/{user}'
-        result = subprocess.run(['stat', home_dir], stdout=subprocess.PIPE, text=True)
-        print(result)
-        output = result.stdout
-        # Using regular expression to extract the creation date
-        match = re.search(r'Birth: (.+)', output)
-        if match:
-            creation_date_str = match.group(1).strip()
-            creation_date = datetime.strptime(creation_date_str, '%Y-%m-%d %H:%M:%S.%f %z')
-            return creation_date.strftime('%m/%d/%y')
-        return None
-    except Exception as e:
-        print(f"Error occurred: {e}")
-        return None
 
 def check_hosts(filename):
     # Open the file using 'with' to ensure it gets closed after reading
@@ -366,8 +349,9 @@ if __name__ == "__main__":
     print_head("Checking for New Accounts...")
     if OS_type == "Linux":
         user_list = get_linux_users_from_passwd()
+        print("Cannot determine account creation...manually check the following users...")
         for user in user_list:
-            get_linux_folder_creation_date(user)
+            print(f"{user}")
     elif OS_type == "MacOS":
         # Get user list
         user_list = get_macos_user_list()
