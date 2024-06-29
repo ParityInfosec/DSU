@@ -261,6 +261,7 @@ def check_file(file, start_date, end_date):   # Not working
     access_date = datetime.fromtimestamp(access, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
     
+    print(create_date, access_date, modify_date)
     results = []
     if is_date_between(create_date,start_date,end_date):
         results.append([True, "Create", create_date])
@@ -276,6 +277,7 @@ def check_files(top_folder):
     for root, dirs, files in os.walk(top_folder):
         for file in files:
             filepath = os.path.join(root, file)
+            print(filepath, start_engage, end_engage)
             results = check_file(filepath, start_engage, end_engage)             # Not working
             for i in results:
                 if OS_type == "Linux" or OS_type == "MacOS":
@@ -378,7 +380,7 @@ if __name__ == "__main__":
             for user, create_date in user_creation_dates:
                 if create_date:
                     create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
-                    create_date_ = create_date.strftime('%m/%d/%y')
+                    create_date = create_date.strftime('%m/%d/%y')
                     print(f"User: {user}, Created on: {create_date}")
         except:      
             print(f"Error: Check Users Manually")
