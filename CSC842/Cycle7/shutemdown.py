@@ -278,15 +278,19 @@ def check_files(top_folder):
             filepath = os.path.join(root, file)
             results = check_file(filepath, start_engage, end_engage)             # Not working
             for i in results:
-                if os.access(filepath, os.X_OK):
-                    is_executable = True 
-                else:
-                    is_executable = False
+                if OS_type == "Linux" or OS_type == "MacOS":
+                    if os.access(filepath, os.X_OK):
+                        is_executable = True 
+                    else:
+                        is_executable = False
                 if OS_type == "Windows":    
                     GetFileAttributes = ctypes.windll.kernel32.GetFileAttributesW
                     attributes = GetFileAttributes(filepath)
                     FILE_ATTRIBUTE_SYSTEM = 0x04
-                    is_executable = attributes & FILE_ATTRIBUTE_SYSTEM
+                    if attributes & FILE_ATTRIBUTE_SYSTEM >= 1:
+                        is_executable = True
+                    else:
+                        is_executable = False
                 filesTable.add_row([filepath, i[1], i[2], is_executable])
     print(filesTable)
 
