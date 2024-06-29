@@ -282,7 +282,8 @@ def check_files(top_folder):
                     is_executable = True 
                 else:
                     is_executable = False
-                if OS_type == "Windows":
+                if OS_type == "Windows":    
+                    GetFileAttributes = ctypes.windll.kernel32.GetFileAttributesW
                     attributes = GetFileAttributes(filepath)
                     FILE_ATTRIBUTE_SYSTEM = 0x04
                     is_executable = attributes & FILE_ATTRIBUTE_SYSTEM
