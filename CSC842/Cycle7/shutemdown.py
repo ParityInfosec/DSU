@@ -253,19 +253,15 @@ def check_connects():
 
 def check_file(file, start_date, end_date):   # Not working
     create = os.path.getctime(file)
-    access = os.path.getatime(file)
     modify = os.path.getmtime(file)
 
     date_format = "%m/%d/%y"
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
-    access_date = datetime.fromtimestamp(access, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
 
     results = []
     if is_date_between(create_date,start_date,end_date):
         results.append([True, "Create", create_date])
-    if is_date_between(access_date,start_date,end_date):
-        results.append([True, "Access", access_date])
     if is_date_between(modify_date,start_date,end_date):
         results.append([True, "Modify", modify_date])
     return results
