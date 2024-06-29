@@ -240,7 +240,7 @@ def check_connects():
             table.add_row([laddr, lport, conn.status, conn.pid, pname])
 
     # Print the table
-    table.sortby = "lport"
+    table.sortby = "Local Port"
     print(table)
 
 def check_file(file, start_date, end_date):   # Not working
