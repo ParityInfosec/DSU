@@ -216,6 +216,7 @@ def get_linux_folder_creation_date(user):
     try:
         home_dir = f'/home/{user}'
         result = subprocess.run(['stat', home_dir], stdout=subprocess.PIPE, text=True)
+        print(result)
         output = result.stdout
         # Using regular expression to extract the creation date
         match = re.search(r'Birth: (.+)', output)
