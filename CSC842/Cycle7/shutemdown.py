@@ -272,7 +272,6 @@ def check_files(top_folder):
     for root, dirs, files in os.walk(top_folder):
         for file in files:
             filepath = os.path.join(root, file)
-            print(filepath, start_engage, end_engage)
             results = check_file(filepath, start_engage, end_engage)             # Not working
             for i in results:
                 if OS_type == "Linux" or OS_type == "MacOS":
