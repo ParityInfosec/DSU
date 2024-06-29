@@ -368,12 +368,11 @@ if __name__ == "__main__":
        # try:
         for user, create_date in user_creation_dates:
             print(user, "[[", create_date, "]]")
-            date_format = "%m/%d/%y"
-            create_date = datetime.fromtimestamp(create_date, pytz.UTC).strftime(date_format)
-            print(create_date)
             if user_creation_dates:
-                for user, creation_date in user_creation_dates:
-                    print(f"User: {user}, Created on: {creation_date}")
+                date_format = "%m/%d/%y"
+                create_date = datetime.fromtimestamp(create_date, pytz.UTC).strftime(date_format)
+                print(create_date)
+                print(f"User: {user}, Created on: {creation_date}")
             else:
                 print("No user creation dates found or error occurred")
         #except:      
