@@ -270,6 +270,7 @@ def check_files(top_folder):
     filesTable = PrettyTable()
     filesTable.field_names = ["File", "Type", "Date", "Executable?"]
     for root, dirs, files in os.walk(top_folder):
+        print(files)
         for file in files:
             filepath = os.path.join(root, file)
             results = check_file(filepath, start_engage, end_engage)             # Not working
