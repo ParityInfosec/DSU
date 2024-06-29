@@ -364,19 +364,15 @@ if __name__ == "__main__":
             print("No user accounts found or error occurred.")    
     elif OS_type == "Windows":
         user_creation_dates = get_win_user_creation_dates()
-        print(user_creation_dates)
-       # try:
-        for user, create_date in user_creation_dates:
-            print(user, "[[", create_date, "]]")
-            if create_date:
-                create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
-                create_date_ = create_date.strftime('%m/%d/%y')
-                print(create_date)
-                print(f"User: {user}, Created on: {create_date}")
-            else:
-                print("No user creation dates found or error occurred")
-        #except:      
-           # print(f"Error: Check Users Manually")
+        try:
+            for user, create_date in user_creation_dates:
+                if create_date:
+                    create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
+                    create_date_ = create_date.strftime('%m/%d/%y')
+                    print(create_date)
+                    print(f"User: {user}, Created on: {create_date}")
+        except:      
+            print(f"Error: Check Users Manually")
 
 
     print_head("Checking for Listeners...")
