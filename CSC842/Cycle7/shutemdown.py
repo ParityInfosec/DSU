@@ -369,7 +369,7 @@ if __name__ == "__main__":
         for user, create_date in user_creation_dates:
             print(user, "[[", create_date, "]]")
             date_format = "%m/%d/%y"
-            create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
+            create_date = datetime.fromtimestamp(create_date, pytz.UTC).strftime(date_format)
             print(create_date)
             if user_creation_dates:
                 for user, creation_date in user_creation_dates:
