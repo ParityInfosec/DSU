@@ -147,7 +147,6 @@ def get_win_user_creation_dates():
     )
 
     result = subprocess.run(['powershell', '-Command', command], stdout=subprocess.PIPE, text=True)
-    print(result)
     # Parse the JSON output
     # Check if the command executed successfully
     if result.returncode != 0:
@@ -367,6 +366,7 @@ if __name__ == "__main__":
             for user in user_creation_dates:
                 date_format = "%m/%d/%y"
                 create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
+                print(create_date)
                 if user['CreationDate'] and is_date_between(create_date, start_engage, end_engage):
                     print(f"New User Found: {user['Name']}")
         except:      
