@@ -351,7 +351,7 @@ if __name__ == "__main__":
         user_list = get_linux_users_from_passwd()
         print("Cannot determine account creation...manually check the following users...")
         for user in user_list:
-            print(f"{user}")
+            print(f"- {user}")
     elif OS_type == "MacOS":
         # Get user list
         user_list = get_macos_user_list()
