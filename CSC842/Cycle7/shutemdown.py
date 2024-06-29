@@ -147,7 +147,7 @@ def get_win_user_creation_dates():
     )
 
     result = subprocess.run(['powershell', '-Command', command], stdout=subprocess.PIPE, text=True)
-
+    print(result)
     # Parse the JSON output
     # Check if the command executed successfully
     if result.returncode != 0:
