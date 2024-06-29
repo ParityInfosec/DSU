@@ -294,6 +294,7 @@ def check_files(top_folder):
                         is_executable = False
                 filesTable.add_row([filepath, i[1], i[2], is_executable])
     filesTable.sortby = "Type"
+    filesTable.reversesort = True
     print(filesTable)
 
 if __name__ == "__main__":
