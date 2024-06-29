@@ -366,7 +366,8 @@ if __name__ == "__main__":
         user_creation_dates = get_win_user_creation_dates()
         print(user_creation_dates)
         try:
-            for user in user_creation_dates:
+            for user, crate_date in user_creation_dates:
+                print(user, create_date)
                 date_format = "%m/%d/%y"
                 create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
                 print(create_date)
