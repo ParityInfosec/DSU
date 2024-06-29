@@ -365,7 +365,9 @@ if __name__ == "__main__":
         user_creation_dates = get_win_user_creation_dates()
         try:
             for user in user_creation_dates:
-                if user['CreationDate'] and is_date_between(user['CreationDate'], start_engage, end_engage):
+                date_format = "%m/%d/%y"
+                create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
+                if user['CreationDate'] and is_date_between(create_date, start_engage, end_engage):
                     print(f"New User Found: {user['Name']}")
         except:      
             print(f"Error: Check Users Manually")
