@@ -192,7 +192,7 @@ def get_mac_folder_creation_date(user):
         match = re.search(r'kMDItemFSCreationDate\s=\s(.+)', output)
         if match:
             creation_date_str = match.group(1).strip()
-            creation_date = datetime.strptime(creation_date_str, '%Y-%m-%d %H:%M:%S %z')
+            creation_date = datetime.strptime(creation_date_str, '%m/%d/%Y %H:%M:%S')
             #return creation_date.strftime('%Y-%m-%d %H:%M:%S')
             return creation_date.strftime('%m/%d/%y')
         else:
