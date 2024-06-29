@@ -365,19 +365,19 @@ if __name__ == "__main__":
     elif OS_type == "Windows":
         user_creation_dates = get_win_user_creation_dates()
         print(user_creation_dates)
-        try:
-            for user, create_date in user_creation_dates:
-                print(user, "[[", create_date, "]]")
-                date_format = "%m/%d/%y"
-                create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
-                print(create_date)
-                if user_creation_dates:
-                    for user, creation_date in user_creation_dates:
-                        print(f"User: {user}, Created on: {creation_date}")
-                else:
-                    print("No user creation dates found or error occurred")
-        except:      
-            print(f"Error: Check Users Manually")
+       # try:
+        for user, create_date in user_creation_dates:
+            print(user, "[[", create_date, "]]")
+            date_format = "%m/%d/%y"
+            create_date = datetime.fromtimestamp(user['CreationDate'], pytz.UTC).strftime(date_format)
+            print(create_date)
+            if user_creation_dates:
+                for user, creation_date in user_creation_dates:
+                    print(f"User: {user}, Created on: {creation_date}")
+            else:
+                print("No user creation dates found or error occurred")
+        #except:      
+           # print(f"Error: Check Users Manually")
 
 
     print_head("Checking for Listeners...")
