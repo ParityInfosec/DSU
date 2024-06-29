@@ -260,15 +260,14 @@ def check_file(file, start_date, end_date):   # Not working
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
     access_date = datetime.fromtimestamp(access, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
-    print(start_date, end_date)
-    print(create_date, access_date, modify_date)
+
     results = []
     if is_date_between(create_date,start_date,end_date):
         results.append([True, "Create", create_date])
     if is_date_between(access_date,start_date,end_date):
-        results.append([True, "Access", create_date])
+        results.append([True, "Access", access_date])
     if is_date_between(modify_date,start_date,end_date):
-        results.append([True, "Modify", create_date])
+        results.append([True, "Modify", modify_date])
     return results
 
 def check_files(top_folder):
@@ -294,6 +293,7 @@ def check_files(top_folder):
                     else:
                         is_executable = False
                 filesTable.add_row([filepath, i[1], i[2], is_executable])
+    filesTable.sortby = "Type"
     print(filesTable)
 
 if __name__ == "__main__":
