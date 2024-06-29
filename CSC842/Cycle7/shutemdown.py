@@ -20,7 +20,6 @@ import argparse
 import psutil
 import platform                 # Much better than os for cross platform
 import pytz
-import json
 from prettytable import PrettyTable
 from datetime import datetime
 # Test for imports tied to GUIs; fail back to CLI and continue if not available
@@ -74,7 +73,7 @@ def select_date(title_msg):
 def open_folder_picker():
     # Create the main window
     root = tk.Tk()
-    root.title("Tkinter Folder Picker Example")
+    root.title("Folder Picker")
     root.geometry("600x100")
 
     # Variable to store the selected folder path
@@ -203,6 +202,16 @@ def get_mac_folder_creation_date(user):
         print(f"Error occurred: {e}")
         return None
 
+def get_linux_users_from_passwd():
+    users = []
+    with open('/etc/passwd', 'r') as passwd_file:
+        for line in passwd_file:
+            parts = line.split(':')
+            if len(parts) > 1:
+                username = parts[0]
+                users.append(username)
+    return users
+
 def get_linux_folder_creation_date(user):
     try:
         home_dir = f'/home/{user}'
@@ -218,8 +227,6 @@ def get_linux_folder_creation_date(user):
     except Exception as e:
         print(f"Error occurred: {e}")
         return None
-
-
 
 def check_hosts(filename):
     # Open the file using 'with' to ensure it gets closed after reading
@@ -258,8 +265,7 @@ def check_file(file, start_date, end_date):   # Not working
     date_format = "%m/%d/%y"
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
-    print(file, start_date, end_date)
-    print(create_date, modify_date)
+
     results = []
     if is_date_between(create_date,start_date,end_date):
         results.append([True, "Create", create_date])
@@ -358,7 +364,9 @@ if __name__ == "__main__":
 
     print_head("Checking for New Accounts...")
     if OS_type == "Linux":
-        hostsFile = "/etc/hosts"
+        user_list = get_linux_users_from_passwd()
+        for user in user_list:
+            get_linux_folder_creation_date(user)
     elif OS_type == "MacOS":
         # Get user list
         user_list = get_macos_user_list()
