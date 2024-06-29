@@ -207,7 +207,7 @@ def get_linux_users_from_passwd():
     with open('/etc/passwd', 'r') as passwd_file:
         for line in passwd_file:
             parts = line.split(':')
-            if len(parts) > 1 and parts[1] >=1000:
+            if len(parts) > 1 and int(parts[1]) >=1000:
                 username = parts[0]
                 users.append(username)
     return users
