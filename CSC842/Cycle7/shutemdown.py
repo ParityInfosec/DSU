@@ -236,6 +236,9 @@ def check_connects():
             laddr = f"{conn.laddr.ip}" if conn.laddr else "N/A"
             lport = f"{conn.laddr.port}" if conn.laddr else "N/A"
             pname = f"{psutil.Process(conn.pid).name()}"
+            
+            if lport != "N/A":
+                lport = int(lport) 
             # Add a row to the table
             table.add_row([laddr, lport, conn.status, conn.pid, pname])
 
