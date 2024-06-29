@@ -368,7 +368,7 @@ if __name__ == "__main__":
        # try:
         for user, create_date in user_creation_dates:
             print(user, "[[", create_date, "]]")
-            if user_creation_dates!= '':
+            if create_date:
                 create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
                 create_date_ = create_date.strftime('%m/%d/%y')
                 print(create_date)
