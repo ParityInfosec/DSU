@@ -1,7 +1,7 @@
 # ShutemDown
 ### Close Up Shop
 
-Video: htttp://youtube.com
+Video: https://youtu.be/6dr6njG4PyM
 
 Github: https://github.com/ParityInfosec/DSU/tree/main/CSC842/Cycle7
 
@@ -35,7 +35,7 @@ Additionally, this can be the start to a general Incident Response tool against 
 - Build in forensic tools (file type mismatch via magic number, time stomp finder)
 - Allow file type searching (in events where you *know* a team used specific files)
 - Export file / send to logger for signle consolidated enterprise test record at end of engagement (proof of cleanup/artifact removal)
-- Check for timestomp'd files that aren't flagged by MAC checks
+
 
 ### Requirements
 - Python
