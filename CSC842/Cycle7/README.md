@@ -58,7 +58,7 @@ Enables users to bring a single, standalone file over to a client system for che
 
 Users must:
 1. From a __*non-scoped*__ system (i.e. pentester computer), run the following command.
-   - **NOTE**: This MUST be performed on each OS type you desire to test on. This can be emulated via wine and QEMU, but is easiest if prepped ahead of time on native OS hosts and carried on engagements.
+   - **NOTE**: This MUST be performed on each OS type you desire to test on. This can be emulated via wine and QEMU, but is easiest if prepped ahead of time on native OS hosts and carried on engagements. Additioanlly, the system running pyinstaller is the only one required to have all imports installed.
 
 > pyinstaller --onefile shutemdown.py
 
@@ -66,8 +66,8 @@ Users must:
 3. Execute and follow up on items of concern
 
 ## References
-https://www.sans.org/white-papers/39495/
-https://docs.python.org/3/library/tkinter.html
-https://pypi.org/project/prettytable/
-https://community.spiceworks.com/t/list-all-ad-users-created-date-created-by-last-logged-in/704680/2
-https://learning.oreilly.com/library/view/macintosh-terminal-pocket/9781449328962/re98.html
+- https://www.sans.org/white-papers/39495/
+- https://docs.python.org/3/library/tkinter.html
+- https://pypi.org/project/prettytable/
+- https://community.spiceworks.com/t/list-all-ad-users-created-date-created-by-last-logged-in/704680/2
+- https://learning.oreilly.com/library/view/macintosh-terminal-pocket/9781449328962/re98.html
