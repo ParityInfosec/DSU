@@ -28,8 +28,8 @@ try:
     from babel import numbers
     from tkcalendar import Calendar
     from tkinter import ttk, filedialog
-except ImportError:
-    print(f"Warning: Could not import {module_name}. GUI options not available.")
+except ImportError as e:
+    print(f"Warning: Could not import: {e}. GUI options not available.")
     import_failure = True
 
 # Easier to run outside current directory
@@ -293,7 +293,7 @@ if __name__ == "__main__":
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
     parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')   # Set to . for testing phase
     parser.add_argument('-F', '--folder', action='store_true', help='Enable top folder picker')
-    parser.add_argument('-G', '--gui', action='store_true', help='Enable GUI display')      # Not functioning yet
+    parser.add_argument('-C', '--cli', action='store_true', help='CLI only; disables GUI popups')      # Not functioning yet
     args = parser.parse_args()
 
     print_head("System Details...")
