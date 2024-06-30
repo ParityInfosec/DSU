@@ -247,9 +247,12 @@ def check_connects():
     print(table)
 
 def check_file(file, start_date, end_date):   # Not working
-    create = os.path.getctime(file)
-    modify = os.path.getmtime(file)
-
+    try:
+        create = os.path.getctime(file)
+        modify = os.path.getmtime(file)
+    except FileNotFoundError as e:
+        return []
+    
     date_format = "%m/%d/%y"
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
     modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
@@ -317,7 +320,7 @@ if __name__ == "__main__":
     top_folder = args.location
 
     print_head("Engagement Window")
-    if args.gui or import_failure:
+    if args.cli or import_failure:
         if not(start_engage):
             print("Enter Start Date")
             start_engage = get_date()
