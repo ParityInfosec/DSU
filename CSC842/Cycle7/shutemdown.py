@@ -288,6 +288,7 @@ def check_files(top_folder):
                 filesTable.add_row([filepath, i[1], i[2], is_executable])
     filesTable.sortby = "Type"
     filesTable.reversesort = True
+    filesTable.max_width = 88
     print(filesTable)
 
 if __name__ == "__main__":
