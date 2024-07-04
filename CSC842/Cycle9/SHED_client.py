@@ -305,11 +305,14 @@ def check_file(file, start_date, end_date):
         results.append([False, "!!Time Stomped!!", "N/A"])
     return results
 
-def check_files(top_folder):
+def check_files(top_folder, extensions):
     filesTable = PrettyTable()
     filesTable.field_names = ["File", "Type", "Date", "Executable?"]
     for root, dirs, files in os.walk(top_folder):
-        for file in files:
+        # Add in for function for extension in extensions
+        for file, extension in files, extensions:
+            if extension == file.split('.')[-1]:                    # Does this work?!?!?!?
+                continue                                        
             filepath = os.path.join(root, file)
             results = check_file(filepath, start_engage, end_engage)
             for i in results:
@@ -444,7 +447,12 @@ if __name__ == "__main__":
 
     print_head("Checking for Listeners...")
     check_connects()
+    extensions = []
+    if args.extension:
+        parts = args.extension.split(',')
+        for p in parts:
+            extensions.append(p)
 
     print_head("Checking files for changes during engagment window...")
-    check_files(top_folder)
+    check_files(top_folder, extensions)
 

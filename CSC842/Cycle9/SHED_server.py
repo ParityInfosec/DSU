@@ -53,6 +53,7 @@ def nmapHosts(host):
     return host, os_type
 
 if __name__ == "__main__":
+    banner()
     parser = argparse.ArgumentParser(description="SHut Em Down (SHED)")
     parser.add_argument('-L','--list', help='Read in target IPs from file')
     parser.add_argument('-I','--IPs', help='Target IPs')
