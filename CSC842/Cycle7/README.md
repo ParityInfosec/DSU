@@ -1,7 +1,7 @@
 # ShutemDown
 ### Close Up Shop
 
-Video: htttp://youtube.com
+Video: https://youtu.be/6dr6njG4PyM
 
 Github: https://github.com/ParityInfosec/DSU/tree/main/CSC842/Cycle7
 
@@ -17,7 +17,7 @@ This tool is designed to check the window of the engagement, but it also can be 
 Additionally, this can be the start to a general Incident Response tool against any forms of attacks.
 
 ## Three Main Points of the Tool:
-- Checks for files created or modify during established pentest engagement window stil left on a client system
+- Checks for files created or modify during established pentest engagement window still left on a client system
 - Checks for listeners/processes left open on a client system
 - Inspects for local users added during the engagement window
 
@@ -34,8 +34,8 @@ Additionally, this can be the start to a general Incident Response tool against 
 ## Future Improvements
 - Build in forensic tools (file type mismatch via magic number, time stomp finder)
 - Allow file type searching (in events where you *know* a team used specific files)
-- Export file / send to logger for signle consolidated enterprise test record at end of engagement (proof of cleanup/artifact removal)
-- Check for timestomp'd files that aren't flagged by MAC checks
+- Export file / send to logger for single consolidated enterprise test record at end of engagement (proof of cleanup/artifact removal)
+
 
 ### Requirements
 - Python
