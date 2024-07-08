@@ -23,9 +23,22 @@ import os
 import argparse
 import nmap
 import datetime
+from colorama import Fore, Back, Style
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
+
+def banner():
+    print(f"{Fore.BLUE}      _______ _     _ _______ ______ \r\n\
+      |______ |_____| |______ |     \\ \r\n\
+      ______| |     | |______ |_____/   \r\n\
+    {Fore.RED}\
+  _______________________________ \r\n\
+    || ____ ____ ____ _  _ ____ ____ || \r\n\
+    || [__  |___ |__/ |  | |___ |__/ ||\r\n\
+    || ___] |___ |  \\  \\/  |___ |  \\ ||\r\n\
+    ||_______________________________||\
+    {Fore.RESET}                          ")
 
 def file_finder():
     # CLI and GUI file pickers
@@ -44,12 +57,13 @@ def readIPs():
     f = file_finder()
     return f
 
-def nmapHosts(host):
+def nmapHosts(target):
     # run nmap, return host and os_type
     # should run once or many times?
     # export data to 
-    scanner = nmap.PortScanner()
-    os_type = scanner.scaninfo()
+    nm = nmap.PortScanner()
+    nm.scan(target, '<port>')
+    os_type = nm.scaninfo()
     return host, os_type
 
 if __name__ == "__main__":

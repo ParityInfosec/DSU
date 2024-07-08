@@ -22,6 +22,8 @@ import platform                 # Much better than os for cross platform
 import pytz
 from prettytable import PrettyTable
 from datetime import datetime
+
+from CSC842.Cycle7.shutemdown import OS_type
 # Test for imports tied to GUIs; fail back to CLI and continue if not available
 try:
     import tkinter as tk
@@ -135,6 +137,23 @@ def get_ips():
                 ip_addresses.append(address.address)
     return ip_addresses
 
+def get_sys_params():
+    if platform.system() == "Linux":
+        OS_type = "Linux"
+        hostsFile = "/etc/hosts"
+        user_root = "/home"
+    elif platform.system() == "Darwin":
+        OS_type = "MacOS"
+        hostsFile = "/etc/hosts"
+        user_root = "/Users"
+    elif platform.system() == "Windows":
+        OS_type = "Windows"
+        hostsFile = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+        user_root = "C:\\Windows\\Users"
+    else:
+        exit(f"ERROR: This system type is not supported.  Exiting...")
+    return OS_type, hostsFile, user_root
+
 #################################################### User tools 
 def get_win_user_creation_dates():
     # PowerShell command to get all users and their creation dates
@@ -218,10 +237,26 @@ def get_linux_users_from_passwd():
                 users.append(username, create_date)
     return users
 
-def get_linux_home_creation(user):
+def get_home_creation(user, user_root):
+    user_folder = os.path.join(user_root, user)
     # Check home folder creation, if exists
-    # check audit logs
-    return create_date
+    try:
+        stat_info = os.stat(user_folder)
+        if hasattr(stat_info, 'st_birthtime'):
+            # For Unix
+            creation_time = stat_info.st_birthtime
+        else:
+            # For Windows and other systems that do not have st_birthtime
+            creation_time = stat_info.st_ctime
+        creation_date = datetime.datetime.fromtimestamp(creation_time)
+        return creation_date
+    except FileNotFoundError:
+        print(f"- {user} has no home directory.")
+        return None
+    
+def check_audit(user):
+    # Check audit files to determine if creation exists for correlation
+    return False
 
 def check_hosts(filename):
     # Open the file using 'with' to ensure it gets closed after reading
@@ -363,15 +398,7 @@ if __name__ == "__main__":
                 report_file = file_picker()
         
     print_head("System Details...")
-    if platform.system() == "Linux":
-        OS_type = "Linux"
-        hostsFile = "/etc/hosts"
-    elif platform.system() == "Darwin":
-        OS_type = "MacOS"
-        hostsFile = "/etc/hosts"
-    elif platform.system() == "Windows":
-        OS_type = "Windows"
-        hostsFile = "C:\\Windows\\System32\\drivers\\etc\\hosts"
+    OS_type, hostsFile, user_root = get_sys_params() 
     print(OS_type)
     print(platform.node())
     ipv4s = get_ips()
@@ -400,9 +427,9 @@ if __name__ == "__main__":
             top_folder = get_directory()
         print(top_folder)
     else:
-        while start_engage == None:                                         # Fixed error on exit
+        while start_engage == None:                                       
             start_engage = select_date("Select Start Date")
-        while end_engage == None:                                           # Fixed error on exit
+        while end_engage == None:                                         
             end_engage = select_date("Select End Date")
         print(f"Start: {start_engage}")
         print(f"End: {end_engage}")
