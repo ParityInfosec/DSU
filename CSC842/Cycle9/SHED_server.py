@@ -324,7 +324,7 @@ if __name__ == "__main__":
     # Loop through the top-level keys
     for category, systems in test_systems.items():
         if category == 'ssh':
-            print(f"Category: {category}")
+            print_head(f"Category: {category}")
             # Loop through the nested dictionaries
             for ip, details in systems.items():
                 print(f"IP Address: {ip}")
@@ -333,4 +333,4 @@ if __name__ == "__main__":
                 print(f"OS: {details['OS']}")
                 ssh_launch(ip, details['port'], details['OS'],execution_folder)
         else:
-            print(f"Category: {category} error - Only SSH is supported at this time...future improvements will enable psexec")
+            print_head(f"Category: {category} error - Only SSH is supported at this time...future improvements will enable psexec")
