@@ -45,9 +45,9 @@ path = os.path.abspath(os.path.dirname(__file__))
 #################################################### Display / UI 
 # Custom pretty print header format
 def print_head(header):
-    print(f"\n\r{Fore.ORANGE}" + "=" *95)
+    print(f"\n\r{Fore.LIGHTYELLOW_EX}" + "=" *95)
     print(f"{header}")
-    print("=" *95 + f'Fore.ORANGE')
+    print("=" *95 + f'{Fore.RESET}')
 
 
 def select_date(title_msg):
