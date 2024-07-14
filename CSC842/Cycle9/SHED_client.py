@@ -576,4 +576,5 @@ if __name__ == "__main__":
                       "Users": users_JSON
                       }
     # print(json.dumps(details_JSON, indent=4))
+    print(f'JSON stored at: {execution_folder}/results.shed')
     write_to_file(execution_folder, "results.shed", json.dumps(system_results, indent=4))
