@@ -251,7 +251,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
         print(cmd)
         if 'win' in OS.lower():
-            ssh.exec_command(cmd)
+            ssh.exec_command(f'cmd /c "{cmd}"')
         else:
             # Execute the command
             ssh.exec_command(f'chmod +x {str(remote_path)}')
