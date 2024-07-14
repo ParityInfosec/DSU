@@ -9,14 +9,24 @@ Project/Lab: Cycle 9 - SHut Em Down (SHED) v2 Client
 ----------	---	----------------------------------------------------------
 '''
 
-global import_failure
-import_failure = False
 import os
-import re
-import ctypes
 import socket
 import subprocess
 import argparse
+
+global import_failure
+import_failure = False
+def install_missing_packages(package_names):
+    for package in package_names:
+        if importlib.util.find_spec(package) is None:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+# Packages to check and install
+required_packages = ["re", "ctypes", "psutil", "platform", "pytz", "colorama", "prettytable"]
+install_missing_packages(required_packages)
+
+
+import re
+import ctypes
 import psutil
 import platform                 # Much better than os for cross platform
 import pytz
