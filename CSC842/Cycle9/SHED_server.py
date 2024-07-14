@@ -187,18 +187,23 @@ def upload_file_via_scp(ssh, local_path, remote_path):
 
 def execute_sudo_command(ssh, command):
     sudo_password = getpass.getpass(prompt="Enter sudo password: ")
-
+    # Open a session
+    session = ssh.get_transport().open_session()
+    # Request a TTY (pseudo-terminal)
+    session.get_pty()
+    # Start a shell session
+    session.invoke_shell()
     # Send the sudo command
-    ssh.send(f"sudo {command}\n")
+    session.send(f"sudo {command}\n")
     # Wait for the password prompt
     time.sleep(1)
     # Send the sudo password
-    ssh.send(sudo_password + '\n')
+    session.send(sudo_password + '\n')
     # Wait for the command to execute
     time.sleep(2)
     
     # Receive the command output
-    output = ssh.read().decode()
+    output = session.read().decode()
     return output
 
 def ssh_launch(ip, port, OS):
@@ -207,13 +212,14 @@ def ssh_launch(ip, port, OS):
     username = input('User: ')
     password = getpass.getpass(prompt="Enter SSH password: ")
     path_elements = []
-    file = "shutemdown"
+    file = "SHED_client"
    
     # Normal use of os.path is bad when writing for a different os target than the os for host
     if "win" in OS.lower():
         path_elements = ['C', 'Windows', 'Temp', file]
         remote_path = PureWindowsPath(*path_elements)
         target_os = 'windows'
+        file = "SHED_client.exe"
     else:
         path_elements = ['/tmp', file]
         remote_path = PurePosixPath(*path_elements)
@@ -235,11 +241,11 @@ def ssh_launch(ip, port, OS):
         # Execute the command
         ssh.exec_command(f'chmod +x {str(remote_path)}')
         
-        cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /tmp'
+        cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /root'
+        log_file = f' > /tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.shed'
+        cmd = cmd + log_file
         print(cmd)
-        log_file = f'/tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.shed'
-        
-        output = execute_sudo_command(f'{cmd} > {log_file}')
+        output = execute_sudo_command(ssh, cmd)
 
         print(f"Output: {output}")
 

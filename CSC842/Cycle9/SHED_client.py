@@ -422,7 +422,7 @@ def check_files(top_folder, extensions, files_JSON={}):
                     # If the split does not yield an extension, handle it as no extension
                     raise ValueError(f"No extension found for file: {file}")
             except ValueError as ve:
-                print(ve)
+                # print(ve)
                 file_extension = ""
 
             for extension in extensions:
