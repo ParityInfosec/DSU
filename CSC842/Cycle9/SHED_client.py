@@ -45,7 +45,7 @@ except ImportError as e:
     import_failure = True
 
 # fix colorama issue with Windows
-init(convert=True, autoreset=True)
+init(autoreset=True)
 
 sus_procs = {'nc', "python", "python3", "php"}
 
