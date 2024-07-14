@@ -206,20 +206,19 @@ def execute_sudo_command(ssh, command):
     output = session.read().decode()
     return output
 
-def ssh_launch(ip, port, OS):
+def ssh_launch(ip, port, OS, path_elements=[]):
     global start_date, end_date
     
     username = input('User: ')
     password = getpass.getpass(prompt="Enter SSH password: ")
-    path_elements = []
     file = "SHED_client"
    
     # Normal use of os.path is bad when writing for a different os target than the os for host
     if "win" in OS.lower():
+        file = "SHED_client.exe"
         path_elements = ['C', 'Windows', 'Temp', file]
         remote_path = PureWindowsPath(*path_elements)
         target_os = 'windows'
-        file = "SHED_client.exe"
     else:
         path_elements = ['/tmp', file]
         remote_path = PurePosixPath(*path_elements)
@@ -236,7 +235,6 @@ def ssh_launch(ip, port, OS):
         # Connect to the server
         ssh = create_ssh_client(ip, port, username, password)
         upload_file_via_scp(ssh, local_path, remote_path)
-        #top_folder = input("Top Folder: ")
 
         # Execute the command
         ssh.exec_command(f'chmod +x {str(remote_path)}')
@@ -271,7 +269,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="SHut Em Down (SHED) - Server")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
-    parser.add_argument('--location', help='Scan for target IPs')
+    parser.add_argument('--location', help='Top Folder to search')
 
     # Limit to one of the following 3 options for IP processing
     IP_group = parser.add_mutually_exclusive_group(required=True)

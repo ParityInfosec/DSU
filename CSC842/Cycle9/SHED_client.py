@@ -453,7 +453,7 @@ if __name__ == "__main__":
     parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')
     parser.add_argument('-F', '--folder', action='store_true', help='Enable top folder picker')
     parser.add_argument('-C', '--cli', action='store_true', help='CLI only; disables GUI popups')      
-    parser.add_argument('-R', '--report', action='store_true', help='Save to local report file')                 # v2, how do you enforce? Tee to file? Save stdin, stdout, and stderr...
+    parser.add_argument('-R', '--report', help='Save to local report file')
     args = parser.parse_args()
 
     date_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
@@ -461,7 +461,7 @@ if __name__ == "__main__":
         # Create save file
         # Start outputting data to report_file
         # Create folder for each time run
-        execution_folder = os.path.join(path, date_time)
+        execution_folder = os.path.join(args.report, date_time)
         try:
             os.mkdir(execution_folder)
         except FileNotFoundError as e:
