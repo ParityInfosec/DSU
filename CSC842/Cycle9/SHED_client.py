@@ -23,7 +23,6 @@ import pytz
 from prettytable import PrettyTable
 from datetime import datetime
 
-from CSC842.Cycle7.shutemdown import OS_type
 # Test for imports tied to GUIs; fail back to CLI and continue if not available
 try:
     import tkinter as tk
