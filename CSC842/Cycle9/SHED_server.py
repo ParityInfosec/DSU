@@ -252,7 +252,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
 
         if 'win' in OS.lower():
             ssh.exec_command(cmd)
-            print("ran successfully")
+            time.sleep(15)
         else:
             # Execute the command
             ssh.exec_command(f'chmod +x {str(remote_path)}')
