@@ -100,7 +100,7 @@ def write_to_file(execution_folder, filename, content):
 #################################################### Process hosts
 def nmapHosts(targets, execution_folder):
     try:
-        # export data to 
+        print(targets)
         nm = nmap.PortScanner()
         arguments = '-Pn -O --osscan-guess --version-all'
         if no_strike_list:
