@@ -353,7 +353,6 @@ def check_files(top_folder, extensions):
         extensions.append('*')
     for root, dirs, files in os.walk(top_folder):
         # Add in for function for extension in extensions
-        print(f"Root: {root}")
         for file in files:
             try:
                 file_extension = file.split('.')[-1]
