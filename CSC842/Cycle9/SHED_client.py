@@ -14,6 +14,7 @@ import socket
 import subprocess, sys
 import argparse
 import importlib.util
+
 global import_failure
 import_failure = False
 def install_missing_packages(package_names):
@@ -21,11 +22,12 @@ def install_missing_packages(package_names):
         if importlib.util.find_spec(package) is None:
             subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 # Packages to check and install
-required_packages = ["re", "ctypes", "psutil", "platform", "pytz", "colorama", "prettytable"]
+required_packages = ["re", "ctypes", "psutil", "platform", "pytz", "colorama", "prettytable", "json"]
 install_missing_packages(required_packages)
 
 
 import re
+import json
 import ctypes
 import psutil
 import platform                 # Much better than os for cross platform
@@ -47,7 +49,7 @@ except ImportError as e:
 # fix colorama issue with Windows
 init(autoreset=True)
 
-sus_procs = {'nc', "python", "python3", "php"}
+sus_procs = {'nc', "python", "python3", "php", 'nc.exe', 'ncat.exe'}
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
@@ -168,6 +170,30 @@ def get_sys_params():
     return OS_type, hostsFile, user_root
 
 #################################################### User tools 
+def get_win_users(user_JSON={}):
+    user_creation_dates = get_win_user_creation_dates()
+    try:
+        no_create = 0
+        for user, create_date in user_creation_dates:
+            if create_date:
+                create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
+                create_date = create_date.strftime('%m/%d/%y')
+                user_str = f"{user}, Created on: {create_date}"
+                user_JSON[user] = {'Creation Date': create_date}
+                if is_date_between(create_date, start_engage, end_engage):
+                    user_str = Fore.YELLOW + Back.RED + user_str
+            else:
+                user_str = f"User: {user}"
+                user_JSON[user] = {'Creation Date': 'N/A'}
+
+                no_create += 1
+            print(user_str)
+        if no_create == len(user_creation_dates):
+            print(Fore.LIGHTMAGENTA_EX + "No records show user addition; verify usernames above if outside log retention window")        
+    except:      
+        print(f"Error: Check Users Manually")
+    return user_JSON
+
 def get_win_user_creation_dates():
     # PowerShell command to get all users and their creation dates
     command = (
@@ -284,10 +310,11 @@ def check_hosts(filename):
             if not line.startswith("#"):
                 print(line.strip())
 
-def check_connects():
+def check_connects(connects_JSON={}):
     # Create a table with the desired columns
     table = PrettyTable()
     table.field_names = ["Local Address", "Local Port", "Remote Address", "Remote Port", "Status", "PID", "Process"]
+    
 
     # Fetch all inet connections (TCP/UDP over IPv4/IPv6)
     connections = psutil.net_connections(kind='inet')
@@ -296,8 +323,6 @@ def check_connects():
     # - Capture suspect processes also [done]
     # - Capture add'l details for logging (poss using oneshot?)
     #   -- Get full command with arguments (important for b64 options)
-
-
 
     # Process each connection to find any listeners
     for conn in connections:
@@ -308,19 +333,30 @@ def check_connects():
             raddr = f"{conn.raddr.ip}" if conn.raddr else "N/A"
             rport = f"{conn.raddr.port}" if conn.raddr else "N/A"
             pname = f"{psutil.Process(conn.pid).name()}"
-            
             if lport != "N/A":
                 lport = int(lport) 
             if rport != "N/A":
                 rport = int(rport) 
+            key = f'{laddr}_{lport}'
+            connects_JSON[key] = {
+                table.field_names[0]: laddr, 
+                table.field_names[1]: lport, 
+                table.field_names[2]: raddr, 
+                table.field_names[3]: rport, 
+                table.field_names[4]: conn.status, 
+                table.field_names[5]: conn.pid, 
+                table.field_names[6]: pname
+            }
+            if psutil.Process(conn.pid).name() in sus_procs:
+                pname = Fore.YELLOW + Back.RED + pname + Style.RESET_ALL
+
             # Add a row to the table
             table.add_row([laddr, lport, raddr, rport, conn.status, conn.pid, pname])
-
-
 
     # Print the table
     table.sortby = "Local Port"
     print(table)
+    return connects_JSON
 
 def isTimeStomped(create_date, modify_date):
     # SANS FOR610, deconflict the create/modify dates along with inodes around 
@@ -359,12 +395,14 @@ def check_file(file, start_date, end_date):
         results.append([False, "!!Time Stomped!!", "N/A"])
     return results
 
-def check_files(top_folder, extensions):
+def check_files(top_folder, extensions, files_JSON={}):
     filesTable = PrettyTable()
     filesTable.field_names = ["File", "Type", "Date", "Executable?"]
+    
     if not extensions:
         print('No extensions listed...inserting asterisk')
         extensions.append('*')
+    
     for root, dirs, files in os.walk(top_folder):
         # Add in for function for extension in extensions
         for file in files:
@@ -376,10 +414,11 @@ def check_files(top_folder, extensions):
             except ValueError as ve:
                 print(ve)
                 file_extension = ""
-                
+
             for extension in extensions:
                 if extension == '*' or extension == file_extension:
                     filepath = os.path.join(root, file)
+
             results = check_file(filepath, start_engage, end_engage)
             for i in results:
                 if OS_type == "Linux" or OS_type == "MacOS":
@@ -397,51 +436,68 @@ def check_files(top_folder, extensions):
                     else:
                         is_executable = False
                 filesTable.add_row([filepath, i[1], i[2], is_executable])
+                files_JSON[filepath] = {
+                    filesTable.field_names[1]: i[1], 
+                    filesTable.field_names[2]: i[2], 
+                    filesTable.field_names[3]: is_executable
+                }
     filesTable.sortby = "Type"
     filesTable.reversesort = True
     filesTable.max_width = 88
     print(filesTable)
+    return files_JSON
+
+def write_to_file(execution_folder, filename, content):
+        output_file = os.path.join(execution_folder, filename)
+        with open(output_file, 'w') as f:
+            f.write(content)
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="SHut Em Down (SHED)")
+    parser = argparse.ArgumentParser(description="SHut Em Down (SHED) - Client")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
     parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')
     parser.add_argument('-F', '--folder', action='store_true', help='Enable top folder picker')
     parser.add_argument('-C', '--cli', action='store_true', help='CLI only; disables GUI popups')      
     parser.add_argument('-X', '--extension', help='Specify file extension')                 # v2, not working 
-    parser.add_argument('-G', '--graylog', help='Send data to graylog server \"http://127.0.0.1:9912/\"')  # v2, get from 
-    parser.add_argument('-R', '--report', help='Save to local report file')                 # v2, how do you enforce? Tee to file? Save stdin, stdout, and stderr...
+    parser.add_argument('-R', '--report', action='store_true', help='Save to local report file')                 # v2, how do you enforce? Tee to file? Save stdin, stdout, and stderr...
     args = parser.parse_args()
 
-
-    # Can this be run remotely? Windows Server Environment with AD creds?
-    # Server tool to engage?   Linux/Mac via SSH
-    # Add color output...
     if args.report:
         # Create save file
         # Start outputting data to report_file
-        while report_file == None:
-            # start logging option
-            if args.cli or import_failure:
-                report_file = get_file()
-            else:
-                report_file = file_picker()
+        # Create folder for each time run
+        execution_folder = os.path.join(path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+        try:
+            os.mkdir(execution_folder)
+        except FileNotFoundError as e:
+            print(f"Output folder could not be created: {execution_folder} ... {e}")
+            exit
         
     print_head("System Details...")
     OS_type, hostsFile, user_root = get_sys_params() 
     print(f"Current User: {Fore.BLUE}{os.getlogin()}{Fore.RESET}")
-    print(OS_type)
-    print(platform.node())
+    print(f"OS: {OS_type}")
+    print(f"Hostname: {platform.node()}")
     ipv4s = get_ips()
+    ip_set = []
     for ip in ipv4s:
+        ip_set.append(ip)
+        if not str(ip).startswith("169.254") and not str(ip) == "127.0.0.1":
+            ip = Fore.GREEN + ip
         print(ip)
+
+    details_JSON = {"Hostname": platform.node(),
+                    "Current User": os.getlogin(),
+                    "OS": OS_type,
+                    "IPs": ip_set
+                    }
 
     start_engage = args.start
     end_engage = args.end
     top_folder = args.location
 
-    print_head("Engagement Window")
+    print_head("Engagement Window...")
     if args.cli or import_failure:
         if not(start_engage):
             print("Enter Start Date")
@@ -494,18 +550,11 @@ if __name__ == "__main__":
         if not user_list:
             print("No user accounts found or error occurred.")    
     elif OS_type == "Windows":
-        user_creation_dates = get_win_user_creation_dates()
-        try:
-            for user, create_date in user_creation_dates:
-                if create_date:
-                    create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
-                    create_date = create_date.strftime('%m/%d/%y')
-                    print(f"User: {user}, Created on: {create_date}")
-        except:      
-            print(f"Error: Check Users Manually")
+        users_JSON = get_win_users()
 
     print_head("Checking for Listeners...")
-    check_connects()
+    connects_JSON = check_connects()
+    
     extensions = []
     if args.extension:
         parts = args.extension.split(',')
@@ -513,5 +562,11 @@ if __name__ == "__main__":
             extensions.append(p)
 
     print_head("Checking files for changes during engagment window...")
-    check_files(top_folder, extensions)
-
+    files_JSON = check_files(top_folder, extensions)
+    system_results = {"Details": details_JSON,
+                      "Connections": connects_JSON, 
+                      "Files": files_JSON,
+                      "Users": users_JSON
+                      }
+    # print(json.dumps(details_JSON, indent=4))
+    write_to_file(execution_folder, "results.shed", json.dumps(system_results, indent=4))

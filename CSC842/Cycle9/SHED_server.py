@@ -50,7 +50,7 @@ end_date = ""
 path = os.path.abspath(os.path.dirname(__file__))
 
 # fix colorama issue with Windows
-init(convert=True)
+init(autoreset=True)
 
 # Out-of-scope safety net, excludes these IPs from test
 no_strike_list = ['192.168.122.1']
@@ -87,6 +87,11 @@ def readIPs(fileName, ip_list=[]):
             ip_list.append(line.strip())
     return ip_list
 
+def write_to_file(execution_folder, filename, content):
+        output_file = os.path.join(execution_folder, filename)
+        with open(output_file, 'w') as f:
+            f.write(content)
+
 def nmapHosts(targets, execution_folder):
     try:
         # export data to 
@@ -102,9 +107,7 @@ def nmapHosts(targets, execution_folder):
         scan_json_str = json.dumps(scan_json, indent=4)
         
         # Write the JSON string to a file
-        output_file = os.path.join(execution_folder, 'nmap_scan_results.json')
-        with open(output_file, 'w') as f:
-            f.write(scan_json_str)
+        write_to_file(execution_folder, 'nmap_scan_results.json', scan_json_str)
  
         # Parse the JSON
         scan_data = json.loads(scan_json_str)
@@ -243,7 +246,7 @@ def ssh_to(ip, port, OS):
 
 if __name__ == "__main__":
     banner()
-    parser = argparse.ArgumentParser(description="SHut Em Down (SHED) Server")
+    parser = argparse.ArgumentParser(description="SHut Em Down (SHED) - Server")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
     parser.add_argument('-G', '--graylog', help='Send data to graylog server \"http://127.0.0.1:9912/\"')  # v2, remove?
