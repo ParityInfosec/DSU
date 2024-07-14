@@ -306,10 +306,6 @@ def get_home_creation(user, user_root):
     except FileNotFoundError:
         print(f"- {user} has no home directory.")
         return None
-    
-def check_audit(user):
-    # Check audit files to determine if creation exists for correlation
-    return False
 
 def check_hosts(filename):
     # Open the file using 'with' to ensure it gets closed after reading
@@ -462,11 +458,12 @@ if __name__ == "__main__":
         # Start outputting data to report_file
         # Create folder for each time run
         execution_folder = os.path.join(args.report, "SHED")
-        try:
-            os.mkdir(execution_folder)
-        except FileNotFoundError as e:
-            print(f"Output folder could not be created: {execution_folder} ... {e}")
-            exit
+        if not os.path.exists(execution_folder):
+            try:
+                os.mkdir(execution_folder)
+            except FileNotFoundError as e:
+                print(f"Output folder could not be created: {execution_folder} ... {e}")
+                exit
         
     print_head(f"System Details...{date_time}")
     OS_type, hostsFile, user_root = get_sys_params() 

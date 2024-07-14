@@ -270,7 +270,11 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
     finally:
         # Clean up & Close the connection
         if ssh:
-            dl_log = os.path.join(local_store_folder, ip, 'results.shed')
+            try:
+                dl_log = os.path.join(local_store_folder, ip, 'results.shed')
+                os.mkdir(os.path.join(local_store_folder, ip))
+            except FileNotFoundError as e:
+                print(f"Output folder could not be created: ... {e}")
             download_file_via_scp(ssh, log_path, dl_log)
             ssh.exec_command(f'rm -f {remote_path}')
             ssh.close()
