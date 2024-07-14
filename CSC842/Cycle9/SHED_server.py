@@ -257,6 +257,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
             # Execute the command
             ssh.exec_command(f'chmod +x {str(remote_path)}')
             output = execute_sudo_command(ssh, cmd)
+            print("ran successfully")
     finally:
         # Clean up & Close the connection
         if ssh:
