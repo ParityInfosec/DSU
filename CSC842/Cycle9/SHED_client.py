@@ -348,6 +348,9 @@ def check_file(file, start_date, end_date):
 def check_files(top_folder, extensions):
     filesTable = PrettyTable()
     filesTable.field_names = ["File", "Type", "Date", "Executable?"]
+    if not extensions:
+        print('No extensions listed...inserting asterisk')
+        extensions.append('*')
     for root, dirs, files in os.walk(top_folder):
         # Add in for function for extension in extensions
         for file, extension in files, extensions:
