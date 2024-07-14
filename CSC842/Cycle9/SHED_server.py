@@ -248,11 +248,11 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
             return
         top_folder = input("Top Folder to search: ")
         upload_file_via_scp(ssh, local_path, remote_path)
-        time.sleep(2)
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
 
         if 'win' in OS.lower():
             ssh.exec_command(cmd)
+            print("ran successfully")
         else:
             # Execute the command
             ssh.exec_command(f'chmod +x {str(remote_path)}')
@@ -266,7 +266,6 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
                 os.mkdir(os.path.join(local_store_folder, ip))
             except FileNotFoundError as e:
                 print(f"Output folder could not be created: ... {e}")
-            time.sleep(5)
             download_file_via_scp(ssh, log_path, dl_log)
             ssh.exec_command(f'rm -rf {str(folder_path)}')
             ssh.exec_command(f'rm -f {remote_path}')
