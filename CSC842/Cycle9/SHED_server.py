@@ -78,9 +78,9 @@ def banner():
     {Fore.RESET}                          ")
 
 #################################################### IPs 
-def getIPs_cli(csv_list):
-    targets = []
+def getIPs_cli(csv_list, targets=[]):
     ip_list = csv_list.split(',')
+    print(ip_list)
     for host in ip_list:
         #check if valid IP via re
         targets.append(host)
@@ -256,13 +256,8 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
             return
         top_folder = input("Top Folder to search: ")
         upload_file_via_scp(ssh, local_path, remote_path)
-
-
-        
         
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
-        #log_file = f'{report_folder}/{execute_folder}/report.shed'
-        # cmd = cmd + str(log_path)
         print(cmd)
         if 'win' in OS.lower():
             ssh.exec_command(cmd)
