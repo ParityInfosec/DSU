@@ -11,9 +11,9 @@ Project/Lab: Cycle 9 - SHut Em Down (SHED) v2 Client
 
 import os
 import socket
-import subprocess
+import subprocess, sys
 import argparse
-
+import importlib.util
 global import_failure
 import_failure = False
 def install_missing_packages(package_names):
