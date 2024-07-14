@@ -20,6 +20,7 @@ import argparse
 import psutil
 import platform                 # Much better than os for cross platform
 import pytz
+from colorama import init, Fore, Back, Style
 from prettytable import PrettyTable
 from datetime import datetime
 
@@ -33,6 +34,9 @@ except ImportError as e:
     print(f"Warning: Could not import: {e}. GUI options not available.")
     import_failure = True
 
+# fix colorama issue with Windows
+init(convert=True)
+
 sus_procs = {'nc', "python", "python3", "php"}
 
 # Easier to run outside current directory
@@ -41,9 +45,9 @@ path = os.path.abspath(os.path.dirname(__file__))
 #################################################### Display / UI 
 # Custom pretty print header format
 def print_head(header):
-    print("\n\r" + "=" *95)
+    print(f"\n\r{Fore.ORANGE}" + "=" *95)
     print(f"{header}")
-    print("=" *95)
+    print("=" *95 + f'Fore.ORANGE')
 
 
 def select_date(title_msg):
@@ -416,6 +420,7 @@ if __name__ == "__main__":
         
     print_head("System Details...")
     OS_type, hostsFile, user_root = get_sys_params() 
+    print(f"Current User: {Fore.BLUE}{os.getlogin()}{Fore.RESET}")
     print(OS_type)
     print(platform.node())
     ipv4s = get_ips()
