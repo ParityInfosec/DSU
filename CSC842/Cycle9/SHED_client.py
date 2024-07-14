@@ -405,29 +405,13 @@ def check_file(file, start_date, end_date):
         results.append([False, "!!Time Stomped!!", "N/A"])
     return results
 
-def check_files(top_folder, extensions, files_JSON={}):
+def check_files(top_folder, files_JSON={}):
     filesTable = PrettyTable()
     filesTable.field_names = ["File", "Type", "Date", "Executable?"]
-    
-    if not extensions:
-        print('No extensions listed...inserting asterisk')
-        extensions.append('*')
-    
+   
     for root, dirs, files in os.walk(top_folder):
-        # Add in for function for extension in extensions
         for file in files:
-            try:
-                file_extension = file.split('.')[-1]
-                if file_extension == file:
-                    # If the split does not yield an extension, handle it as no extension
-                    raise ValueError(f"No extension found for file: {file}")
-            except ValueError as ve:
-                # print(ve)
-                file_extension = ""
-
-            for extension in extensions:
-                if extension == '*' or extension == file_extension:
-                    filepath = os.path.join(root, file)
+            filepath = os.path.join(root, file)
 
             results = check_file(filepath, start_engage, end_engage)
             for i in results:
@@ -469,7 +453,6 @@ if __name__ == "__main__":
     parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')
     parser.add_argument('-F', '--folder', action='store_true', help='Enable top folder picker')
     parser.add_argument('-C', '--cli', action='store_true', help='CLI only; disables GUI popups')      
-    parser.add_argument('-X', '--extension', help='Specify file extension')                 # v2, not working 
     parser.add_argument('-R', '--report', action='store_true', help='Save to local report file')                 # v2, how do you enforce? Tee to file? Save stdin, stdout, and stderr...
     args = parser.parse_args()
 
@@ -561,15 +544,9 @@ if __name__ == "__main__":
 
     print_head("Checking for Listeners...")
     connects_JSON = check_connects()
-    
-    extensions = []
-    if args.extension:
-        parts = args.extension.split(',')
-        for p in parts:
-            extensions.append(p)
 
     print_head("Checking files for changes during engagment window...")
-    files_JSON = check_files(top_folder, extensions)
+    files_JSON = check_files(top_folder)
     system_results = {"Details": details_JSON,
                       "Connections": connects_JSON, 
                       "Files": files_JSON,
