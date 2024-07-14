@@ -9,16 +9,6 @@ Project/Lab: Cycle 9 - SHED v2 - Server
 ----------------
 '''
 
-# With pre-generated pyinstaller files
-# - intake system IP list OR perform scan (must be one or the other, not both and not none)
-# - Determine OS type
-# - Launch checker with authrorized creds...
-#  -- Windows (psexec as admin)
-#  -- Mac/Linux (scp, ssh scripted? executable and .sh file?  sudo capes)
-
-# graylog py????
-# Is there a way to look for variations from baseline to end_engage?
-
 import subprocess, sys
 import importlib.util
 
@@ -218,7 +208,7 @@ def execute_sudo_command(ssh, command):
     output = session.recv(1024).decode()
     return output
 
-def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=[]):
+def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=[], remote_elements=[]):
     global start_date, end_date
     file = "SHED_client"
     log = "results.shed"
@@ -227,14 +217,18 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
     # Normal use of os.path is bad when writing for a different os target than the os for host
     if "win" in OS.lower():
         file = "SHED_client.exe"
+        remote_elements = ['C:/', 'Temp', 'SHED']
         path_elements = ['C:/', 'Temp', file]
         log_elements = ['C:/', 'Temp', 'SHED', log]
+        folder_path = PureWindowsPath(*remote_elements)
         remote_path = PureWindowsPath(*path_elements)
         log_path = PureWindowsPath(*log_elements)
         target_os = 'windows'
     else:
+        remote_elements = ['/tmp', 'SHED']
         path_elements = ['/tmp', file]
         log_elements = [report_folder, 'SHED', log]
+        folder_path = PurePosixPath(*remote_elements)
         remote_path = PurePosixPath(*path_elements)
         log_path = PurePosixPath(*log_elements)
         if 'macOS' in OS:
@@ -273,6 +267,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
             except FileNotFoundError as e:
                 print(f"Output folder could not be created: ... {e}")
             download_file_via_scp(ssh, log_path, dl_log)
+            ssh.exec_command(f'rm -rf {str(folder_path)}')
             ssh.exec_command(f'rm -f {remote_path}')
             ssh.close()
 
