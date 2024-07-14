@@ -177,7 +177,7 @@ def get_linux_users(users_JSON={}):
         print("Cannot determine account creation...manually check the following users...")
         for user in user_list:
             print(f"- {user}")
-            users_JSON['user'] = {'Creation Date': 'N/A'}
+            users_JSON[user] = {'Creation Date': 'N/A'}
 
 def get_win_users(users_JSON={}):
     user_creation_dates = get_win_user_creation_dates()
