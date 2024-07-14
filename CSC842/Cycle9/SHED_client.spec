@@ -2,7 +2,7 @@
 
 
 a = Analysis(
-    ['shutemdown.py'],
+    ['SHED_client.py'],
     pathex=[],
     binaries=[],
     datas=[],
@@ -22,7 +22,7 @@ exe = EXE(
     a.binaries,
     a.datas,
     [],
-    name='shutemdown',
+    name='SHED_client',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
