@@ -229,8 +229,8 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
     # Normal use of os.path is bad when writing for a different os target than the os for host
     if "win" in OS.lower():
         file = "SHED_client.exe"
-        path_elements = ['C:/', 'Windows', 'Temp', file]
-        log_elements = ['C:/', 'Windows', 'Temp', 'SHED', log]
+        path_elements = ['C:/', 'Temp', file]
+        log_elements = ['C:/', 'Temp', 'SHED', log]
         remote_path = PureWindowsPath(*path_elements)
         log_path = PureWindowsPath(*log_elements)
         target_os = 'windows'
