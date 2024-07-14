@@ -326,6 +326,8 @@ def check_file(file, start_date, end_date):
         modify = os.path.getmtime(file)
     except FileNotFoundError as e:
         return []
+    except PermissionError as p:
+        print(f'{p}: {file}')
     
     date_format = "%m/%d/%y"
     create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
