@@ -21,6 +21,8 @@ Project/Lab: Cycle 9 - SHED v2 - Server
 
 import subprocess, sys
 import importlib.util
+
+from paramiko import AuthenticationException
 # Credited to work from Walt Del Orbe, https://github.com/DSUcyberops/csc842/tree/main/cycle8
 # Function to check and install missing packages
 def install_missing_packages(package_names):
@@ -44,8 +46,8 @@ from scp import SCPClient
 from colorama import init, Fore, Back, Style
 
 #################################################### Initialization 
-start_date = ""
-end_date = ""
+#start_date = "00/00/00"
+#end_date = "00/00/00"
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
@@ -174,16 +176,28 @@ def find_remote_accessible(scan_JSON, ssh_list={}, win_list={}):
     return test_systems
 
 #################################################################################################### ssh to systems 
-def create_ssh_client(hostname, port, username, password):
-    ssh = paramiko.SSHClient()
-    ssh.load_system_host_keys()
-    ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-    ssh.connect(hostname, port=port, username=username, password=password)
-    return ssh
+def create_ssh_client(hostname, port, fails=0):
+    while(fails<3):
+        try:
+            username = input('User: ')
+            password = getpass.getpass(prompt="Enter SSH password: ")
+
+            ssh = paramiko.SSHClient()
+            ssh.load_system_host_keys()
+            ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+            ssh.connect(hostname, port=port, username=username, password=password)
+            return ssh
+        except AuthenticationException as ae:
+            print(f"Check Creadentials: {ae}")
+            fails+=1
 
 def upload_file_via_scp(ssh, local_path, remote_path):
     with SCPClient(ssh.get_transport()) as scp:
         scp.put(local_path, remote_path)
+
+def download_file_via_scp(ssh, remote_path, local_path):
+    with SCPClient(ssh.get_transport()) as scp:
+        scp.get(remote_path, local_path)
 
 def execute_sudo_command(ssh, command):
     sudo_password = getpass.getpass(prompt="Enter sudo password: ")
@@ -206,22 +220,25 @@ def execute_sudo_command(ssh, command):
     output = session.recv(1024).decode()
     return output
 
-def ssh_launch(ip, port, OS, path_elements=[]):
+def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=[]):
     global start_date, end_date
-    
-    username = input('User: ')
-    password = getpass.getpass(prompt="Enter SSH password: ")
     file = "SHED_client"
-   
+    log = "results.shed"
+    report_folder = input("Folder to store report (remote): ")
+
     # Normal use of os.path is bad when writing for a different os target than the os for host
     if "win" in OS.lower():
         file = "SHED_client.exe"
         path_elements = ['C', 'Windows', 'Temp', file]
+        log_elements = ['C', 'Windows', 'Temp', 'SHED', log]
         remote_path = PureWindowsPath(*path_elements)
+        log_path = PureWindowsPath(*log_elements)
         target_os = 'windows'
     else:
         path_elements = ['/tmp', file]
+        log_elements = [report_folder, 'SHED', log]
         remote_path = PurePosixPath(*path_elements)
+        log_path = PurePosixPath(*log_elements)
         if 'macOS' in OS:
             target_os = 'macos'
         elif "iOS" in OS:
@@ -233,29 +250,30 @@ def ssh_launch(ip, port, OS, path_elements=[]):
     local_path = os.path.join(path, "dist", target_os, file)
     try:
         # Connect to the server
-        ssh = create_ssh_client(ip, port, username, password)
+        ssh = create_ssh_client(ip, port)
+        if not ssh:
+            print("No session created...exiting")
+            return
+        top_folder = input("Top Folder to search: ")
         upload_file_via_scp(ssh, local_path, remote_path)
 
         # Execute the command
         ssh.exec_command(f'chmod +x {str(remote_path)}')
         
-        cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /root --report /tmp'
-        log_file = f' > /tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.shed'
-        cmd = cmd + log_file
+        
+        cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
+        #log_file = f'{report_folder}/{execute_folder}/report.shed'
+        # cmd = cmd + str(log_path)
         print(cmd)
         output = execute_sudo_command(ssh, cmd)
-
-        print(f"Output: {output}")
-
+        print(output)
     finally:
-        #stdin, stdout, stderr = ssh.exec_command(f'rm -f {remote_path}')
-        
-        # Read the output and error streams
-        #output = stdout.read().decode()
-        #error = stderr.read().decode()
-        
-        # Close the connection
-        ssh.close()
+        # Clean up & Close the connection
+        if ssh:
+            dl_log = os.path.join(local_store_folder, ip, 'results.shed')
+            download_file_via_scp(ssh, log_path, dl_log)
+            ssh.exec_command(f'rm -f {remote_path}')
+            ssh.close()
 
 def ssh_all(test_systems):
     print_head('SSH')
@@ -265,11 +283,12 @@ def ssh_all(test_systems):
 
 
 if __name__ == "__main__":
+    global start_date, end_date
+    
     banner()
     parser = argparse.ArgumentParser(description="SHut Em Down (SHED) - Server")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
-    parser.add_argument('--location', help='Top Folder to search')
 
     # Limit to one of the following 3 options for IP processing
     IP_group = parser.add_mutually_exclusive_group(required=True)
@@ -290,9 +309,8 @@ if __name__ == "__main__":
         exit
 
 
-    start_engage = args.start
-    end_engage = args.end
-    top_folder = args.location
+    start_date = args.start
+    end_date = args.end
 
     if args.file:
         targets = readIPs(args.file)
@@ -318,6 +336,6 @@ if __name__ == "__main__":
                 print(f"Hostname: {details['hostname']}")
                 print(f"Service: {details['service']}")
                 print(f"OS: {details['OS']}")
-                ssh_launch(ip, details['port'], details['OS'])
+                ssh_launch(ip, details['port'], details['OS'],execution_folder)
         else:
-            print("Only SSH is supported at this time...future improvements will enable psexec")
+            print(f"Category: {category} error - Only SSH is supported at this time...future improvements will enable psexec")

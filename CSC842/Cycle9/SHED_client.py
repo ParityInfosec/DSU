@@ -461,7 +461,7 @@ if __name__ == "__main__":
         # Create save file
         # Start outputting data to report_file
         # Create folder for each time run
-        execution_folder = os.path.join(args.report, date_time)
+        execution_folder = os.path.join(args.report, "SHED")
         try:
             os.mkdir(execution_folder)
         except FileNotFoundError as e:
