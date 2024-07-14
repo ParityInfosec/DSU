@@ -265,8 +265,8 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
                 os.mkdir(os.path.join(local_store_folder, ip))
             except FileNotFoundError as e:
                 print(f"Output folder could not be created: ... {e}")
+            time.sleep(5)
             download_file_via_scp(ssh, log_path, dl_log)
-            time.sleep(2)
             ssh.exec_command(f'rm -rf {str(folder_path)}')
             ssh.exec_command(f'rm -f {remote_path}')
             ssh.close()
