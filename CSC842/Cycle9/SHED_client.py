@@ -229,11 +229,15 @@ def get_linux_users_from_passwd():
             parts = line.split(':')
 
             # What if user is <= 1000?
-
+            if len(parts) > 1 and int(parts[2]) >=1000:
+                username = parts[0]
+                users.append(username)
+            '''
             if len(parts) > 1 and int(parts[2]) >=1000:
                 username = parts[0]
                 create_date = get_home_creation(username)
                 users.append(username, create_date)
+            '''
     return users
 
 def get_home_creation(user, user_root):
