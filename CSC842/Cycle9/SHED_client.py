@@ -173,11 +173,12 @@ def get_sys_params():
 
 #################################################### User tools 
 def get_linux_users(users_JSON={}):
-        user_list = get_linux_users_from_passwd()
-        print("Cannot determine account creation...manually check the following users...")
-        for user in user_list:
-            print(f"- {user}")
-            users_JSON[f'{user}'] = {'Creation Date': 'N/A'}
+    user_list = get_linux_users_from_passwd()
+    print("Cannot determine account creation...manually check the following users...")
+    for user in user_list:
+        print(f"- {user}")
+        users_JSON[f'{user}'] = {'Creation Date': 'N/A'}
+    return users_JSON
 
 def get_win_users(users_JSON={}):
     user_creation_dates = get_win_user_creation_dates()
