@@ -353,12 +353,21 @@ def check_files(top_folder, extensions):
         extensions.append('*')
     for root, dirs, files in os.walk(top_folder):
         # Add in for function for extension in extensions
-        print(files)
-        print(extensions)
-        for file, extension in files, extensions:
-            if extension == file.split('.')[-1]:                    # Does this work?!?!?!?
-                continue                                        
-            filepath = os.path.join(root, file)
+        print(f'Files: {files}')
+        print(f'Extensions: {extensions}')
+        for file in files:
+            try:
+                file_extension = file.split('.')[-1]
+                if file_extension == file:
+                    # If the split does not yield an extension, handle it as no extension
+                    raise ValueError(f"No extension found for file: {file}")
+            except ValueError as ve:
+                print(ve)
+                file_extension = ""
+                
+            for extension in extensions:
+                if extension == '*' or extension == file_extension:
+                    filepath = os.path.join(root, file)
             results = check_file(filepath, start_engage, end_engage)
             for i in results:
                 if OS_type == "Linux" or OS_type == "MacOS":
