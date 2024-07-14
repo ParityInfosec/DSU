@@ -453,7 +453,7 @@ if __name__ == "__main__":
     parser.add_argument('-L', '--location', help='Set top folder for checks, default: root [/ or c:\\]')
     parser.add_argument('-F', '--folder', action='store_true', help='Enable top folder picker')
     parser.add_argument('-C', '--cli', action='store_true', help='CLI only; disables GUI popups')      
-    parser.add_argument('-R', '--report', help='Save to local report file')
+    parser.add_argument('-R', '--report', required=True, help='Save to local report file')
     args = parser.parse_args()
 
     date_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")

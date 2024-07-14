@@ -203,7 +203,7 @@ def execute_sudo_command(ssh, command):
     time.sleep(2)
     
     # Receive the command output
-    output = session.read().decode()
+    output = session.recv(1024).decode()
     return output
 
 def ssh_launch(ip, port, OS, path_elements=[]):
@@ -239,7 +239,7 @@ def ssh_launch(ip, port, OS, path_elements=[]):
         # Execute the command
         ssh.exec_command(f'chmod +x {str(remote_path)}')
         
-        cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /root'
+        cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /root --report /tmp'
         log_file = f' > /tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.shed'
         cmd = cmd + log_file
         print(cmd)
@@ -273,8 +273,8 @@ if __name__ == "__main__":
 
     # Limit to one of the following 3 options for IP processing
     IP_group = parser.add_mutually_exclusive_group(required=True)
-    IP_group.add_argument('-L','--list', type=str, help='Read in target IPs from file')
-    IP_group.add_argument('-I','--IPs', type=str, help='Comma seperated list of target IPs')
+    IP_group.add_argument('--file', type=str, help='Read in target IPs from file')
+    IP_group.add_argument('--list', type=str, help='Comma seperated list of target IPs')
     IP_group.add_argument('--scan', action='store_true', help='Scan for target IPs')
  
     args = parser.parse_args()
@@ -294,10 +294,10 @@ if __name__ == "__main__":
     end_engage = args.end
     top_folder = args.location
 
-    if args.list:
-        targets = readIPs(args.list)
-    elif args.IPs:
-        targets = getIPs_cli(args.IPs)
+    if args.file:
+        targets = readIPs(args.file)
+    elif args.list:
+        targets = getIPs_cli(args.list)
     elif args.scan:
         targets.append(input("Provide IP space via CIDR notation:  "))
     else:
@@ -310,11 +310,14 @@ if __name__ == "__main__":
 
     # Loop through the top-level keys
     for category, systems in test_systems.items():
-        print(f"Category: {category}")
-        # Loop through the nested dictionaries
-        for ip, details in systems.items():
-            print(f"IP Address: {ip}")
-            print(f"Hostname: {details['hostname']}")
-            print(f"Service: {details['service']}")
-            print(f"OS: {details['OS']}")
-            ssh_launch(ip, details['port'], details['OS'])
+        if category == 'ssh':
+            print(f"Category: {category}")
+            # Loop through the nested dictionaries
+            for ip, details in systems.items():
+                print(f"IP Address: {ip}")
+                print(f"Hostname: {details['hostname']}")
+                print(f"Service: {details['service']}")
+                print(f"OS: {details['OS']}")
+                ssh_launch(ip, details['port'], details['OS'])
+        else:
+            print("Only SSH is supported at this time...future improvements will enable psexec")
