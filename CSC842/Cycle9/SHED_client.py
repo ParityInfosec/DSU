@@ -49,7 +49,9 @@ except ImportError as e:
 # fix colorama issue with Windows
 init(autoreset=True)
 
-sus_procs = {'nc', "python", "python3", "php", 'nc.exe', 'ncat.exe'}
+#################################################### TTPs; change to teams' SOPs or habits 
+sus_procs = {'nc', "python", "python3", "php", 'nc.exe', 'ncat.exe', 'python.exe', 'python3.exe'}
+sus_ports = {'4444','5555','6666','7777','8888','9999','9998','9997','9996'}
 
 # Easier to run outside current directory
 path = os.path.abspath(os.path.dirname(__file__))
@@ -326,30 +328,30 @@ def check_connects(connects_JSON={}):
 
     # Process each connection to find any listeners
     for conn in connections:
-        if conn.status == 'LISTEN' or psutil.Process(conn.pid).name() in sus_procs:
+        if conn.status == 'LISTEN' or psutil.Process(conn.pid).name() in sus_procs or (conn.laddr and conn.laddr.port in sus_ports) or (conn.raddr and conn.raddr.port in sus_ports):
             # Prepare local and remote addresses
             laddr = f"{conn.laddr.ip}" if conn.laddr else "N/A"
             lport = f"{conn.laddr.port}" if conn.laddr else "N/A"
             raddr = f"{conn.raddr.ip}" if conn.raddr else "N/A"
             rport = f"{conn.raddr.port}" if conn.raddr else "N/A"
             pname = f"{psutil.Process(conn.pid).name()}"
-            if lport != "N/A":
-                lport = int(lport) 
-            if rport != "N/A":
-                rport = int(rport) 
+
             key = f'{laddr}_{lport}'
             connects_JSON[key] = {
                 table.field_names[0]: laddr, 
-                table.field_names[1]: lport, 
+                table.field_names[1]: int(lport) if lport != "N/A" else lport, 
                 table.field_names[2]: raddr, 
-                table.field_names[3]: rport, 
+                table.field_names[3]: int(rport) if rport != "N/A" else rport, 
                 table.field_names[4]: conn.status, 
                 table.field_names[5]: conn.pid, 
                 table.field_names[6]: pname
             }
             if psutil.Process(conn.pid).name() in sus_procs:
                 pname = Fore.YELLOW + Back.RED + pname + Style.RESET_ALL
-
+            if lport in sus_ports:
+                lport = Fore.YELLOW + Back.RED + f'{lport}' + Style.RESET_ALL
+            if rport in sus_ports:
+                rport = Fore.YELLOW + Back.RED + f'{rport}' + Style.RESET_ALL
             # Add a row to the table
             table.add_row([laddr, lport, raddr, rport, conn.status, conn.pid, pname])
 
@@ -463,22 +465,23 @@ if __name__ == "__main__":
     parser.add_argument('-R', '--report', action='store_true', help='Save to local report file')                 # v2, how do you enforce? Tee to file? Save stdin, stdout, and stderr...
     args = parser.parse_args()
 
+    date_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
     if args.report:
         # Create save file
         # Start outputting data to report_file
         # Create folder for each time run
-        execution_folder = os.path.join(path, datetime.now().strftime("%Y-%m-%d_%H-%M-%S"))
+        execution_folder = os.path.join(path, date_time)
         try:
             os.mkdir(execution_folder)
         except FileNotFoundError as e:
             print(f"Output folder could not be created: {execution_folder} ... {e}")
             exit
         
-    print_head("System Details...")
+    print_head(f"System Details...{date_time}")
     OS_type, hostsFile, user_root = get_sys_params() 
-    print(f"Current User: {Fore.BLUE}{os.getlogin()}{Fore.RESET}")
+    print(f"Current User: {Fore.BLUE}{os.getlogin()}")
     print(f"OS: {OS_type}")
-    print(f"Hostname: {platform.node()}")
+    print(f"Hostname: {Fore.MAGENTA}{platform.node()}")
     ipv4s = get_ips()
     ip_set = []
     for ip in ipv4s:
@@ -488,6 +491,7 @@ if __name__ == "__main__":
         print(ip)
 
     details_JSON = {"Hostname": platform.node(),
+                    "Date/Time": date_time,
                     "Current User": os.getlogin(),
                     "OS": OS_type,
                     "IPs": ip_set
@@ -523,8 +527,6 @@ if __name__ == "__main__":
         print(f"End: {end_engage}")
         print_head("Folder Structure...")
         if not(top_folder):
-            top_folder = '.'
-        if args.folder:
             top_folder = open_folder_picker()
         print(top_folder)
     

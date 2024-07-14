@@ -32,6 +32,7 @@ required_packages = ["json", "nmap", "colorama", "paramiko", "scp"]
 install_missing_packages(required_packages)
 
 import os
+import time
 import json
 import argparse
 import nmap
@@ -42,7 +43,7 @@ from pathlib import Path, PurePosixPath, PureWindowsPath
 from scp import SCPClient
 from colorama import init, Fore, Back, Style
 
-
+#################################################### Initialization 
 start_date = ""
 end_date = ""
 
@@ -55,6 +56,12 @@ init(autoreset=True)
 # Out-of-scope safety net, excludes these IPs from test
 no_strike_list = ['192.168.122.1']
 
+#################################################### Display / UI 
+# Custom pretty print header format
+def print_head(header):
+    print(Fore.RED + f"\n\r" + "=" *95)
+    print(Fore.BLUE + f"{header}")
+    print(Fore.RED + "=" *95)
 
 def banner():
     print(f"{Fore.BLUE}      _______ _     _ _______ ______ \r\n\
@@ -68,11 +75,7 @@ def banner():
     ||_______________________________||\r\n\
     {Fore.RESET}                          ")
 
-def file_finder():
-    # CLI and GUI file pickers
-    f = "./here.txt"
-    return f
-
+#################################################### IPs 
 def getIPs_cli(csv_list):
     targets = []
     ip_list = csv_list.split(',')
@@ -92,6 +95,7 @@ def write_to_file(execution_folder, filename, content):
         with open(output_file, 'w') as f:
             f.write(content)
 
+#################################################### Process hosts
 def nmapHosts(targets, execution_folder):
     try:
         # export data to 
@@ -108,68 +112,66 @@ def nmapHosts(targets, execution_folder):
         
         # Write the JSON string to a file
         write_to_file(execution_folder, 'nmap_scan_results.json', scan_json_str)
- 
-        # Parse the JSON
-        scan_data = json.loads(scan_json_str)
-        if not scan_data['scan']:
-            print("No devices detected...exiting")
-            return
-        # Define Apple default naming convention for bypassing fingerprint
-        apples = ["s-air", "s-imac", "s-mbp"]
-        
-        ssh_list = {}
-        win_list = {}
-        
-        for host, result in scan_data['scan'].items():
-            print(f'Host:: {Fore.GREEN}{host}{Fore.RESET}')
-            host_os = "Unknown"             # Default to Unknown value pending tests
-            hostname = "Unknown"
-
-
-            # Display Hostname if available
-            if 'hostnames' in result:
-                for item in result['hostnames']:
-                    hostname = item['name']
-                    print(f"Hostname:: {Fore.BLUE}{hostname}{Fore.RESET}")
-
-            # Display the OS type if available; exclude custom rulesets before pulling osfamily value from NMap
-            # Need to find a way to dictate the top result of the nmap scan
-            if "iphone" in hostname:
-                host_os = "Apple iOS"
-            elif any(var in hostname for var in apples):
-                host_os = "Apple macOS" 
-            elif "xbox" in hostname:
-                host_os = "Windows for XBox"
-            else:
-                if 'osmatch' in result:
-                    for osmatch in result['osmatch']:
-                        for osclass in osmatch['osclass']:
-                            host_os = osclass['osfamily']
-            print(f"OS Type:: {Fore.MAGENTA}{host_os}{Fore.RESET}")    
-
-            # Cycle through port status
-            if 'tcp' in result:
-                print('Open TCP ports:')
-                for port in result['tcp']:
-                    if result['tcp'][port]['state'] =='open':
-                        service_name = result['tcp'][port]['name']
-                        print(f'Port: {port}, Service: {service_name}, State: {result["tcp"][port]["state"]}')
-                        if "ssh" in service_name.lower():
-                            ssh_list[host] = {'hostname': hostname, 'service': service_name, 'port': port, 'OS': host_os}
-                        if "netbios-ssn" in service_name.lower() or "microsoft-ds" in service_name.lower():
-                            win_list[host] = {'hostname': hostname, 'service': service_name, 'port': port, 'OS': host_os}
-            if 'udp' in result:
-                print('Open UDP ports:')
-                for port in result['udp']:
-                    if result['udp'][port]['state'] =='open':
-                        print(f'Port: {port}, State: {result["udp"][port]["state"]}')
-            print()
-        test_systems = {"ssh": ssh_list, "psexec": win_list}
-        return test_systems
+        return scan_json_str
     except nmap.PortScannerError as e:
         print(f'PortScannerError: {e}')
     except Exception as e:
         print(f'An unexpected error occurred: {e}')
+
+def find_remote_accessible(scan_JSON, ssh_list={}, win_list={}):
+    # Parse the JSON
+    scan_data = json.loads(scan_JSON)
+    if not scan_data['scan']:
+        print("No devices detected...exiting")
+        return
+    # Define Apple default naming convention for bypassing fingerprint
+    apples = ["s-air", "s-imac", "s-mbp"]
+        
+    for host, result in scan_data['scan'].items():
+        print(f'Host:: {Fore.GREEN}{host}{Fore.RESET}')
+        host_os = "Unknown"             # Default to Unknown value pending tests
+        hostname = "Unknown"
+
+        # Display Hostname if available
+        if 'hostnames' in result:
+            for item in result['hostnames']:
+                hostname = item['name']
+                print(f"Hostname:: {Fore.BLUE}{hostname}{Fore.RESET}")
+
+        # Display the OS type if available; exclude custom rulesets before pulling osfamily value from NMap
+        # Improvement: Need to find a way to dictate the top result of the nmap scan
+        if "iphone" in hostname:
+            host_os = "Apple iOS"
+        elif any(var in hostname for var in apples):
+            host_os = "Apple macOS" 
+        elif "xbox" in hostname:
+            host_os = "Windows for XBox"
+        else:
+            if 'osmatch' in result:
+                for osmatch in result['osmatch']:
+                    for osclass in osmatch['osclass']:
+                        host_os = osclass['osfamily']
+        print(f"OS Type:: {Fore.MAGENTA}{host_os}{Fore.RESET}")    
+
+        # Cycle through port status
+        if 'tcp' in result:
+            print('Open TCP ports:')
+            for port in result['tcp']:
+                if result['tcp'][port]['state'] =='open':
+                    service_name = result['tcp'][port]['name']
+                    print(f'Port: {port}, Service: {service_name}, State: {result["tcp"][port]["state"]}')
+                    if "ssh" in service_name.lower():
+                        ssh_list[host] = {'hostname': hostname, 'service': service_name, 'port': port, 'OS': host_os}
+                    if "netbios-ssn" in service_name.lower() or "microsoft-ds" in service_name.lower():
+                        win_list[host] = {'hostname': hostname, 'service': service_name, 'port': port, 'OS': host_os}
+        if 'udp' in result:
+            print('Open UDP ports:')
+            for port in result['udp']:
+                if result['udp'][port]['state'] =='open':
+                    print(f'Port: {port}, State: {result["udp"][port]["state"]}')
+        print()
+    test_systems = {"ssh": ssh_list, "psexec": win_list}
+    return test_systems
 
 #################################################################################################### ssh to systems 
 def create_ssh_client(hostname, port, username, password):
@@ -183,7 +185,23 @@ def upload_file_via_scp(ssh, local_path, remote_path):
     with SCPClient(ssh.get_transport()) as scp:
         scp.put(local_path, remote_path)
 
-def ssh_to(ip, port, OS):
+def execute_sudo_command(ssh, command):
+    sudo_password = getpass.getpass(prompt="Enter sudo password: ")
+
+    # Send the sudo command
+    ssh.send(f"sudo {command}\n")
+    # Wait for the password prompt
+    time.sleep(1)
+    # Send the sudo password
+    ssh.send(sudo_password + '\n')
+    # Wait for the command to execute
+    time.sleep(2)
+    
+    # Receive the command output
+    output = ssh.read().decode()
+    return output
+
+def ssh_launch(ip, port, OS):
     global start_date, end_date
     
     username = input('User: ')
@@ -216,22 +234,14 @@ def ssh_to(ip, port, OS):
 
         # Execute the command
         ssh.exec_command(f'chmod +x {str(remote_path)}')
-        '''
+        
         cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /tmp'
         print(cmd)
         log_file = f'/tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.out'
-        stdin, stdout, stderr = ssh.exec_command(f'echo {password} | sudo -S bash -l -c "{cmd} > {log_file}"')
-        '''
-        stdin, stdout, stderr = ssh.exec_command(f'echo {password} | sudo -S /tmp/script.sh')
+        
+        output = execute_sudo_command(f'{cmd} > {log_file}')
 
-        # Read and print the output
-        output = stdout.read().decode()
         print(f"Output: {output}")
-
-        # Read and print any error messages
-        error = stderr.read().decode()
-        if error:
-            print(f"Error: {error}")
 
     finally:
         #stdin, stdout, stderr = ssh.exec_command(f'rm -f {remote_path}')
@@ -243,13 +253,18 @@ def ssh_to(ip, port, OS):
         # Close the connection
         ssh.close()
 
+def ssh_all(test_systems):
+    print_head('SSH')
+    for sys in test_systems['ssh']:
+        
+        print(sys['host'])
+
 
 if __name__ == "__main__":
     banner()
     parser = argparse.ArgumentParser(description="SHut Em Down (SHED) - Server")
     parser.add_argument('-S','--start', help='Engagement Window Start Date [MM/DD/YY]')
     parser.add_argument('-E','--end', help='Engagement Window End Date [MM/DD/YY]')
-    parser.add_argument('-G', '--graylog', help='Send data to graylog server \"http://127.0.0.1:9912/\"')  # v2, remove?
     parser.add_argument('--location', help='Scan for target IPs')
 
     # Limit to one of the following 3 options for IP processing
@@ -285,7 +300,8 @@ if __name__ == "__main__":
         print(f"No target IPs provided...exiting")
         exit
     
-    test_systems = nmapHosts(','.join(targets), execution_folder)
+    scan_JSON = nmapHosts(','.join(targets), execution_folder)
+    test_systems = find_remote_accessible(scan_JSON)
     print(test_systems)
 
     # Loop through the top-level keys
@@ -297,4 +313,4 @@ if __name__ == "__main__":
             print(f"Hostname: {details['hostname']}")
             print(f"Service: {details['service']}")
             print(f"OS: {details['OS']}")
-            ssh_to(ip, details['port'], details['OS'])
+            ssh_launch(ip, details['port'], details['OS'])

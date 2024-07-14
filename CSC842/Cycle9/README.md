@@ -3,7 +3,7 @@
 
 Video: http://youtube.com....
 
-Github: https://github.com/ParityInfosec/DSU/tree/main/CSC842/Cycle7
+Github: https://github.com/ParityInfosec/DSU/tree/main/CSC842/Cycle9
 
 ## Intro / The Why
 When performing penetration tests, we expect all testers to keep rigorous logs and document all actions, but historically this has been a weak area. One of my past testers wrote a paper on how to tackle this issue when working with multiple testers on a mix of scoped systems.  His conclusion was focused on what pentesters can do on their systems to improve logging, but this still can be flawed with dropped data and suffers in situations with multiple open terminals and test applications running simultaneously. 
@@ -14,12 +14,13 @@ SHut Em Down (SHED) was designed with a client-centric focus that checks for typ
 ## BONUS
 This tool is designed to check the window of the engagement, but it also can be used prior to execution to baseline systems. This baseline, along with the final report, can be provided in an annex to customers for added comfort that systems were restored to pre-test configurations. Additionally, this can be the start to a general Incident Response tool against any forms of attacks.
 
-## VERSION 2.0 UPDATES
+# VERSION 2.0 UPDATES
 
-## Three Main Points of the Tool:
-- Checks for files created or modify during established pentest engagement window stil left on a client system
-- Checks for listeners/processes left open on a client system
-- Inspects for local users added during the engagement window
+## Three Main Features/Updates:
+- Now features a server application to run checks against systems that conform to requirements (remote terminal, admin, etc.)
+- Data is now also formatted to JSON standard!
+   - This data is now more ingestible to tools and is easier to work with and compare
+- Built a JSON comparison tool to look for differences between a baseline check and a post-engagement check
 
 
 ### Options
@@ -33,8 +34,11 @@ This tool is designed to check the window of the engagement, but it also can be 
 
 ## Future Improvements
 - Build in forensic tools (file type mismatch via magic number, time stomp finder)
-- Allow file type searching (in events where you *know* a team used specific files)
-- Export file / send to logger for single consolidated enterprise test record at end of engagement (proof of cleanup/artifact removal)
+   - I didn't get to this because of the priority of this, but I still see some purpose in getting there
+- Expand to SIEM integration
+   - This tool features pulling logging back to server and JSON, so the next logical step is a enterprise SIEM
+- Introduce encryption for files at rest
+   - This complicates the JSON comparison, but based on the vast amount of data now comllected and stored, this is critical for risk mitigation
 
 ### Requirements
 - Python
