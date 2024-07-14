@@ -249,15 +249,15 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
         top_folder = input("Top Folder to search: ")
         upload_file_via_scp(ssh, local_path, remote_path)
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
-
+        print(cmd)
         if 'win' in OS.lower():
             ssh.exec_command(cmd)
-            time.sleep(15)
         else:
             # Execute the command
             ssh.exec_command(f'chmod +x {str(remote_path)}')
             output = execute_sudo_command(ssh, cmd)
-            print("ran successfully")
+            print(output)
+        time.sleep(5)
     finally:
         # Clean up & Close the connection
         if ssh:
