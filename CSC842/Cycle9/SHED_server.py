@@ -30,7 +30,7 @@ def install_missing_packages(package_names):
         if importlib.util.find_spec(package) is None:
             subprocess.check_call([sys.executable, "-m", "pip", "install", package])
 # Packages to check and install
-required_packages = ["json", "nmap", "colorama", "paramiko", "scp"]
+required_packages = ["json", "python3-nmap", "colorama", "paramiko", "scp"]
 install_missing_packages(required_packages)
 
 import os
