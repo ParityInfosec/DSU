@@ -248,7 +248,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
             return
         top_folder = input("Top Folder to search: ")
         upload_file_via_scp(ssh, local_path, remote_path)
-        
+        time.sleep(2)
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
 
         if 'win' in OS.lower():
