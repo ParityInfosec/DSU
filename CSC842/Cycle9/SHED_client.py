@@ -45,7 +45,7 @@ except ImportError as e:
     import_failure = True
 
 # fix colorama issue with Windows
-init(convert=True)
+init(convert=True, autoreset=True)
 
 sus_procs = {'nc', "python", "python3", "php"}
 
@@ -55,9 +55,9 @@ path = os.path.abspath(os.path.dirname(__file__))
 #################################################### Display / UI 
 # Custom pretty print header format
 def print_head(header):
-    print(f"\n\r{Fore.LIGHTYELLOW_EX}" + "=" *95)
-    print(f"{header}")
-    print("=" *95 + f'{Fore.RESET}')
+    print(Fore.RED + f"\n\r" + "=" *95)
+    print(Fore.BLUE + f"{header}")
+    print(Fore.RED + "=" *95)
 
 
 def select_date(title_msg):
