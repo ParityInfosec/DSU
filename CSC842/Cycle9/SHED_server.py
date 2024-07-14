@@ -237,7 +237,7 @@ def ssh_launch(ip, port, OS):
         
         cmd = f'{str(remote_path)} --cli --start 07/01/24 --end 07/15/24 --location /tmp'
         print(cmd)
-        log_file = f'/tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.out'
+        log_file = f'/tmp/SHED{datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.shed'
         
         output = execute_sudo_command(f'{cmd} > {log_file}')
 

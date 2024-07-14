@@ -172,7 +172,14 @@ def get_sys_params():
     return OS_type, hostsFile, user_root
 
 #################################################### User tools 
-def get_win_users(user_JSON={}):
+def get_linux_users(users_JSON={}):
+        user_list = get_linux_users_from_passwd()
+        print("Cannot determine account creation...manually check the following users...")
+        for user in user_list:
+            print(f"- {user}")
+            users_JSON['user'] = {'Creation Date': 'N/A'}
+
+def get_win_users(users_JSON={}):
     user_creation_dates = get_win_user_creation_dates()
     try:
         no_create = 0
@@ -181,12 +188,12 @@ def get_win_users(user_JSON={}):
                 create_date = datetime.strptime(create_date, '%m/%d/%Y %H:%M:%S')
                 create_date = create_date.strftime('%m/%d/%y')
                 user_str = f"{user}, Created on: {create_date}"
-                user_JSON[user] = {'Creation Date': create_date}
+                users_JSON[user] = {'Creation Date': create_date}
                 if is_date_between(create_date, start_engage, end_engage):
                     user_str = Fore.YELLOW + Back.RED + user_str
             else:
                 user_str = f"User: {user}"
-                user_JSON[user] = {'Creation Date': 'N/A'}
+                users_JSON[user] = {'Creation Date': 'N/A'}
 
                 no_create += 1
             print(user_str)
@@ -194,7 +201,7 @@ def get_win_users(user_JSON={}):
             print(Fore.LIGHTMAGENTA_EX + "No records show user addition; verify usernames above if outside log retention window")        
     except:      
         print(f"Error: Check Users Manually")
-    return user_JSON
+    return users_JSON
 
 def get_win_user_creation_dates():
     # PowerShell command to get all users and their creation dates
@@ -535,10 +542,7 @@ if __name__ == "__main__":
 
     print_head("Checking for New Accounts...")                  # Add methods to find if things exist
     if OS_type == "Linux":
-        user_list = get_linux_users_from_passwd()
-        print("Cannot determine account creation...manually check the following users...")
-        for user in user_list:
-            print(f"- {user}")
+        users_JSON = get_linux_users()
     elif OS_type == "MacOS":
         # Get user list
         user_list = get_macos_user_list()
