@@ -250,7 +250,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
         upload_file_via_scp(ssh, local_path, remote_path)
         
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
-        print(cmd)
+
         if 'win' in OS.lower():
             ssh.exec_command(cmd)
         else:
@@ -319,7 +319,6 @@ if __name__ == "__main__":
     
     scan_JSON = nmapHosts(' '.join(targets), execution_folder)
     test_systems = find_remote_accessible(scan_JSON)
-    print(test_systems)
 
     # Loop through the top-level keys
     for category, systems in test_systems.items():
@@ -327,10 +326,11 @@ if __name__ == "__main__":
             print_head(f"Category: {category}")
             # Loop through the nested dictionaries
             for ip, details in systems.items():
-                print(f"IP Address: {ip}")
-                print(f"Hostname: {details['hostname']}")
+                print(f"IP Address: {Fore.GREEN}{ip}")
+                print(f"Hostname: {Fore.BLUE}{details['hostname']}")
                 print(f"Service: {details['service']}")
-                print(f"OS: {details['OS']}")
+                print(f"OS: {Fore.MAGENTA}{details['OS']}")
                 ssh_launch(ip, details['port'], details['OS'],execution_folder)
+                print()
         else:
             print_head(f"Category: {category} error - Only SSH is supported at this time...future improvements will enable psexec")
