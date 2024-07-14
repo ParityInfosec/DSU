@@ -80,7 +80,6 @@ def banner():
 #################################################### IPs 
 def getIPs_cli(csv_list, targets=[]):
     ip_list = csv_list.split(',')
-    print(ip_list)
     for host in ip_list:
         #check if valid IP via re
         targets.append(host)
@@ -100,7 +99,6 @@ def write_to_file(execution_folder, filename, content):
 #################################################### Process hosts
 def nmapHosts(targets, execution_folder):
     try:
-        print(targets)
         nm = nmap.PortScanner()
         arguments = '-Pn -O --osscan-guess --version-all'
         if no_strike_list:
@@ -325,7 +323,7 @@ if __name__ == "__main__":
         print(f"No target IPs provided...exiting")
         exit
     
-    scan_JSON = nmapHosts(','.join(targets), execution_folder)
+    scan_JSON = nmapHosts(' '.join(targets), execution_folder)
     test_systems = find_remote_accessible(scan_JSON)
     print(test_systems)
 
