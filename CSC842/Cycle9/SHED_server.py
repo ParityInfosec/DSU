@@ -256,7 +256,6 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
                 stdout.channel.recv_exit_status()  # Wait for command to complete
                 output = stdout.read().decode()
                 error = stderr.read().decode()
-                return output, error
             except Exception as e:
                 print(f"Error running command: {e}")
                 return None, None
