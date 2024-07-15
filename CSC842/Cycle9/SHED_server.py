@@ -230,7 +230,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
         folder_path = PurePosixPath(*remote_elements)
         remote_path = PurePosixPath(*path_elements)
         log_path = PurePosixPath(*log_elements)
-        print(folder_path)
+
         if 'macOS' in OS:
             target_os = 'macos'
         elif "iOS" in OS:
