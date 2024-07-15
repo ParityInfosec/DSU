@@ -187,8 +187,7 @@ def download_file_via_scp(ssh, remote_path, local_path):
     with SCPClient(ssh.get_transport()) as scp:
         scp.get(remote_path, local_path)
 
-def execute_sudo_command(ssh, command):
-    sudo_password = getpass.getpass(prompt="Enter sudo password: ")
+def execute_sudo_command(ssh, command, sudo_password):
     # Open a session
     session = ssh.get_transport().open_session()
     # Request a TTY (pseudo-terminal)
@@ -262,9 +261,9 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
                 return None, None
         else:
             # Execute the command
+            sudo_password = getpass.getpass(prompt="Enter sudo password: ")
             ssh.exec_command(f'chmod +x {str(remote_path)}')
-            output = execute_sudo_command(ssh, cmd)
-            print(output)
+            output = execute_sudo_command(ssh, cmd, sudo_password)
     finally:
         # Clean up & Close the connection
         if ssh:
@@ -275,15 +274,14 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
                 print(f"Output folder could not be created: ... {e}")
             download_file_via_scp(ssh, log_path, dl_log)
             if 'win' in OS.lower():
-                del1 = f"rm -recurse -force {folder_path}"
-                del2 = f"rm -force {remote_path}"
+                stdin, stdout, stderr = ssh.exec_command(f"rm -recurse -force {folder_path}")
+                stdout.channel.recv_exit_status()  # Wait for command to complete
+                stdin, stdout, stderr = ssh.exec_command(f"rm -force {remote_path}")
+                stdout.channel.recv_exit_status()  # Wait for command to complete
             else:
-                del1 = f"rm -rf {folder_path}"
-                del2 = f"rm -f {remote_path}"
-            stdin, stdout, stderr = ssh.exec_command(del1)
-            stdout.channel.recv_exit_status()  # Wait for command to complete
-            stdin, stdout, stderr = ssh.exec_command(del2)
-            stdout.channel.recv_exit_status()  # Wait for command to complete
+                output = execute_sudo_command(ssh, f"rm -rf {folder_path}", sudo_password)
+                output = execute_sudo_command(ssh, f"rm -f {remote_path}", sudo_password)
+
             ssh.close()
 
 def ssh_all(test_systems):
