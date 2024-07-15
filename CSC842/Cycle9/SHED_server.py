@@ -251,7 +251,15 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
         cmd = f'{str(remote_path)} --cli --start {start_date} --end {end_date} --location {top_folder} --report {report_folder}'
         print(cmd)
         if 'win' in OS.lower():
-            ssh.exec_command(f'cmd /c "{cmd}"')
+            try:
+                stdin, stdout, stderr = ssh.exec_command(f'cmd /c "{cmd}"')
+                stdout.channel.recv_exit_status()  # Wait for command to complete
+                output = stdout.read().decode()
+                error = stderr.read().decode()
+                return output, error
+            except Exception as e:
+                print(f"Error running command: {e}")
+                return None, None
         else:
             # Execute the command
             ssh.exec_command(f'chmod +x {str(remote_path)}')
