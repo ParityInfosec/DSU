@@ -264,6 +264,7 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
             sudo_password = getpass.getpass(prompt="Enter sudo password: ")
             ssh.exec_command(f'chmod +x {str(remote_path)}')
             output = execute_sudo_command(ssh, cmd, sudo_password)
+            print(output)
     finally:
         # Clean up & Close the connection
         if ssh:
@@ -280,7 +281,9 @@ def ssh_launch(ip, port, OS, local_store_folder, path_elements=[], log_elements=
                 stdout.channel.recv_exit_status()  # Wait for command to complete
             else:
                 output = execute_sudo_command(ssh, f"rm -rf {folder_path}", sudo_password)
+                print(output)
                 output = execute_sudo_command(ssh, f"rm -f {remote_path}", sudo_password)
+                print(output)
 
             ssh.close()
 
