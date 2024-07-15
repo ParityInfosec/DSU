@@ -20,10 +20,11 @@ This tool is designed to check the window of the engagement, but it also can be 
 - Now features a server application to run checks against systems that conform to requirements (remote terminal, admin, etc.)
 - Data is now also formatted to JSON standard!
    - This data is now more ingestible to tools and is easier to work with and compare
-- Built a JSON comparison tool to look for differences between a baseline check and a post-engagement check
+   - Files are stored with date/time stamps
+- Built a JSON comparison tool to find differences between a baseline check and a post-engagement check
 
 
-### Options
+### Client Options
 | Switch | Arguments |  Description |
 | ------- | ------ | ----------- |
 |  \-S, --start  | MM/DD/YY | Start of the Engagement Window |
@@ -31,6 +32,24 @@ This tool is designed to check the window of the engagement, but it also can be 
 |  \-L, --location | ex: C:\Users, /home | Set Top Folder via cli | 
 |  \-F, --folder |  | Enable GUI folder browser |
 |  \-C, --cli |  | CLI only; disables GUI popups |
+|  \-R, --report |  | Save to local report file |
+
+### Server Options
+| Switch | Arguments |  Description |
+| ------- | ------ | ----------- |
+|  \-S, --start  | MM/DD/YY | Start of the Engagement Window |
+|  \-E, --end  | MM/DD/YY | End of the Engagement Window |
+|  --file | ex: iplist.txt | Read in target IPs from file | 
+|  --list | ex: 192.168.1.15,192.168.1.88 | Comma seperated list of target IPs |
+|  --scan |  | Scan for target IPs  |
+
+### Comparer Options
+| Switch | Arguments |  Description |
+| ------- | ------ | ----------- |
+|  \-1, --baseline  | ex: file1.shed | Pre-Engagement file [BASELINE] |
+|  \-2, --comparison  | ex: file2.shed | Post-Engagement file [COMPARISON] |
+|  \-C, --cli |  | CLI only; disables GUI popups | 
+
 
 ## Future Improvements
 - Build in forensic tools (file type mismatch via magic number, time stomp finder)
@@ -53,6 +72,15 @@ This tool is designed to check the window of the engagement, but it also can be 
 - babel
 - re
 - psutil
+- importlib.util
+- colorama
+- json
+- paramiko
+- getpass
+- scp
+- nmap
+- pathlib
+
 
 ## Pyinstaller
 ### *Requires: pip install pyinstaller*
