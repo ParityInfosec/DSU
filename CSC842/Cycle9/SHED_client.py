@@ -383,23 +383,24 @@ def check_file(file, start_date, end_date):
     try:
         create = os.path.getctime(file)
         modify = os.path.getmtime(file)
+        date_format = "%m/%d/%y"
+        create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
+        modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
+
+        results = []
+        if is_date_between(create_date,start_date,end_date):
+            results.append([True, "Create", create_date])
+        if is_date_between(modify_date,start_date,end_date):
+            results.append([True, "Modify", modify_date])
+        if isTimeStomped(create_date, modify_date):
+            results.append([False, "!!Time Stomped!!", "N/A"])
+        return results
     except FileNotFoundError as e:
         return []
     except PermissionError as p:
         print(f'{p}: {file}')
     
-    date_format = "%m/%d/%y"
-    create_date = datetime.fromtimestamp(create, pytz.UTC).strftime(date_format)
-    modify_date = datetime.fromtimestamp(modify, pytz.UTC).strftime(date_format)
 
-    results = []
-    if is_date_between(create_date,start_date,end_date):
-        results.append([True, "Create", create_date])
-    if is_date_between(modify_date,start_date,end_date):
-        results.append([True, "Modify", modify_date])
-    if isTimeStomped(create_date, modify_date):
-        results.append([False, "!!Time Stomped!!", "N/A"])
-    return results
 
 def check_files(top_folder, files_JSON={}):
     filesTable = PrettyTable()
