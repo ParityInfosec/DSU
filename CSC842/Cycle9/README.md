@@ -1,7 +1,7 @@
 # ShutemDown Version 2.0
 ### Close Up Shop
 
-Video: http://youtube.com....
+Video: https://youtu.be/pawa5TfBM2E
 
 Github: https://github.com/ParityInfosec/DSU/tree/main/CSC842/Cycle9
 
